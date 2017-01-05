@@ -1,6 +1,3 @@
-[submodule "node-river"]
-	path = node-river
-	url = https://github.com/teodor-stoenescu/node-river.git
 [submodule "tracer.node"]
 	path = tracer.node
 	url = https://github.com/teodor-stoenescu/tracer.node.git
