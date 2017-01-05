@@ -31,3 +31,6 @@ Release/
 
 # River SDK
 include/
+
+# Explicitly exclude configuration files
+config.json
