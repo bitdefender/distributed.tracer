@@ -7,3 +7,6 @@
 [submodule "corpus.tester"]
 	path = corpus.tester
 	url = https://github.com/teodor-stoenescu/corpus.tester.git
+[submodule "mongo.rabbit.bridge"]
+	path = mongo.rabbit.bridge
+	url = https://github.com/teodor-stoenescu/mongo.rabbit.bridge.git
