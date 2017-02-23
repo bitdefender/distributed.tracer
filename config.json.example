@@ -4,9 +4,10 @@
 		"port" : 5672,
 		"user" : "<your_rabbit_user_here>",
 		"password" : "<your_rabbit_pass_here>",
-		"queues" : {
-			"new" : "<your_new_test_queue_here>",
-			"batched" : "<your_new_batched_queue_here>"
+		"flow" : {
+			"prefix" : "<all_amqp_objects_will_have_this_prefix>",
+			"new" : "<new_queue_name>",
+			"batched" : "<batched_queue_name>"
 		}
 	},
 
@@ -14,6 +15,6 @@
 		"host" : "<your_mongo_server_ip_here>",
 		"port" : 27017,
 		"database" : "<your_mongo_database_here>",
-		"collection_prefix" : "<your_mongo_collection_prefixes_here>"
+		"prefix" : "<your_mongo_collection_prefixes_here>"
 	}
 }
