@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-[ $# -lt 6 ] && { echo "Usage: $0 [runs] [cores] [river-libfuzzer-path] [benchmark-runs] [(no)rebuild] [(no)regenerate-corpus]"; exit 1; }
-read runs cores rlf_path benchmark_runs rebuild regenerate_corpus <<<$@
+[ $# -lt 7 ] && { echo "Usage: $0 [binary-id] [runs] [cores] [river-libfuzzer-path] [benchmark-runs] [(no)rebuild] [(no)regenerate-corpus]"; exit 1; }
+read binary_id runs cores rlf_path benchmark_runs rebuild regenerate_corpus <<<$@
 
 RUNS=$runs
 DRIVER_DIR=$(pwd)
@@ -9,6 +9,8 @@ CORPUS_TESTER=$DRIVER_DIR/corpus.tester
 TEST_BATCHER=$DRIVER_DIR/test.batcher
 TRACER_NODE=$DRIVER_DIR/tracer.node
 NODE_RIVER=$TRACER_NODE/deps/node-river
+
+DB_NAME="tests_$binary_id"
 STATS_FILE=$(pwd)/logs/stats.csv
 NO_TESTCASES=0
 
@@ -30,8 +32,17 @@ cleanup() {
     cd $TRACER_NODE && rm -rf node_modules/node-river/ && npm install
   fi
 
-  # drop test mongo db
-  mongo test --eval "db.test.drop()"
+  services="mongod.service rabbitmq-server.service mongo.rabbit.bridge.service"
+
+  for s in $services; do
+    active=$(sudo systemctl status $s | grep "active (running)");
+    if [ "$active" == "" ]; then
+      sudo systemctl restart mongo.rabbit.bridge.service;
+    fi
+  done
+
+  # drop $DB_NAME mongo db
+  mongo --eval "db.$DB_NAME.drop()"
 
   # purge rabbit queues
   sudo rabbitmqctl purge_queue batchedtests
@@ -70,15 +81,15 @@ start_corpus_tester() {
 
   echo -e "\033[0;32m[DRIVER] Starting corpus tester ..."; echo -e "\033[0m"
   cd $CORPUS_TESTER
-  node index.js $CORPUS_DIR > /dev/null 2>&1 &
+  node index.js $CORPUS_DIR $binary_id > /dev/null 2>&1 &
 }
 
 start_test_batcher() {
   # now let's batch the testcases
   echo -e "\033[0;32m[DRIVER] Starting test batcher ..."; echo -e "\033[0m"
   cd $TEST_BATCHER
-  for i in $(seq 2); do
-    ( node index.js > /dev/null 2>&1 & )
+  for i in $(seq 1); do
+    ( node index.js $binary_id > /dev/null 2>&1 & )
   done
 }
 
@@ -88,13 +99,13 @@ start_tracer() {
   cd $TRACER_NODE
   export LD_LIBRARY_PATH=$NODE_RIVER/lib
   for i in $(seq $cores) ; do
-    ( node index.js  > /dev/null 2>&1 & )
+    ( node index.js $binary_id > /dev/null 2>&1 & )
   done
 }
 
 wait_for_termination() {
   while true; do
-    left=$(mongo --eval 'db.test.find({state : "traced"}).count()' | tail -n1)
+    left=$(mongo --eval "db.$DB_NAME.find({state : \"traced\"}).count()" | tail -n1)
     sleep 3 #todo fix this
     echo "Tracing progress: $left out of $NO_TESTCASES testcases traced"
     if [ "$left" == "$NO_TESTCASES" ]; then
@@ -104,8 +115,8 @@ wait_for_termination() {
 }
 
 print_statistics() {
-  fst=$(mongo --eval "db.test.find({}, {tracedTS:1, _id:0}).sort({tracedTS: 1}).limit(1)" | tail -n 1 | grep --only-matching --perl-regex "(?<=\"tracedTS\" : )[^ ]*")
-  lst=$(mongo --eval "db.test.find({}, {tracedTS:1, _id:0}).sort({tracedTS: -1}).limit(1)" | tail -n 1 | grep --only-matching --perl-regex "(?<=\"tracedTS\" : )[^ ]*")
+  fst=$(mongo --eval "db.$DB_NAME.find({}, {tracedTS:1, _id:0}).sort({tracedTS: 1}).limit(1)" | tail -n 1 | grep --only-matching --perl-regex "(?<=\"tracedTS\" : )[^ ]*")
+  lst=$(mongo --eval "db.$DB_NAME.find({}, {tracedTS:1, _id:0}).sort({tracedTS: -1}).limit(1)" | tail -n 1 | grep --only-matching --perl-regex "(?<=\"tracedTS\" : )[^ ]*")
   printf "%30s\t%12s\t%8s\t%20s\n" "http-parser" "$NO_TESTCASES" "$cores" "$((lst - fst))" >> $STATS_FILE
 }
 
@@ -118,8 +129,8 @@ main() {
   for i in $(seq $benchmark_runs); do
     cleanup
     generate_testcases
-    start_corpus_tester
     start_test_batcher
+    start_corpus_tester
     start_tracer
     wait_for_termination
     print_statistics
