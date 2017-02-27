@@ -13,7 +13,7 @@ NODE_RIVER=$TRACER_NODE/deps/node-river
 CONFIG_PATH=$(readlink -f config.json)
 
 DB_NAME="tests_$binary_id"
-STATS_FILE=$(pwd)/logs/stats.csv
+STATS_FILE=$(pwd)/logs/stats-$binary_id-$cores.csv
 LOG_FILE=$(pwd)/logs/run.log
 NO_TESTCASES=0
 
@@ -78,7 +78,7 @@ start_test_batcher() {
   echo -e "\033[0;32m[DRIVER] Starting test batcher ..."; echo -e "\033[0m"
   cd $TEST_BATCHER
   for i in $(seq 1); do
-    ( node index.js $binary_id > $LOG_FILE 2>&1 & )
+    ( node index.js -c $CONFIG_PATH $binary_id > $LOG_FILE 2>&1 & )
   done
 }
 
@@ -88,7 +88,7 @@ start_tracer() {
   cd $TRACER_NODE
   export LD_LIBRARY_PATH=$NODE_RIVER/lib
   for i in $(seq $cores) ; do
-    ( node index.js $binary_id > $LOG_FILE 2>&1 & )
+    ( node index.js -c $CONFIG_PATH $binary_id > $LOG_FILE 2>&1 & )
   done
 }
 
