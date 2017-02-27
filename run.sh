@@ -10,6 +10,8 @@ TEST_BATCHER=$DRIVER_DIR/test.batcher
 TRACER_NODE=$DRIVER_DIR/tracer.node
 NODE_RIVER=$TRACER_NODE/deps/node-river
 
+CONFIG_PATH=$(readlink -f config.json)
+
 DB_NAME="tests_$binary_id"
 STATS_FILE=$(pwd)/logs/stats.csv
 NO_TESTCASES=0
@@ -54,34 +56,20 @@ generate_testcases() {
   cd $RLIB_FUZZER
   BUILD_DIR=$(pwd)/../build
 
+  # generate testcases
+  echo -e "\033[0;32m[DRIVER] Generating testcases using river-libfuzzer ..."; echo -e "\033[0m"
   if [ "$regenerate_corpus" == "regenerate-corpus" ]; then
-    # generate testcases
-    echo -e "\033[0;32m[DRIVER] Generating testcases using river-libfuzzer ..."; echo -e "\033[0m"
-
     rm -rf $BUILD_DIR/target-pcs-build
     ./river-scripts/build-all.sh
-
-    cd $BUILD_DIR
-    cd target-pcs-build
-    mkdir CORPUS && mkdir EXT
-    ./fuzzer ./CORPUS -runs=$RUNS -dump_all_testcases=1 -extended_corpus=EXT
   fi
 
-  # $CORPUS_DIR contains $RUNS testcases that will be traced by DRIVER
-  CORPUS_DIR=$(readlink -f $BUILD_DIR/target-pcs-build/EXT)
-  NO_TESTCASES=$(ls -1 $CORPUS_DIR | grep "^[a-fA-F0-9]*$" | wc -l)
-  echo -e "\033[0;32m[DRIVER] Generated $NO_TESTCASES testcases in $CORPUS_DIR ..."; echo -e "\033[0m"
-}
+  cd $BUILD_DIR
+  cd target-pcs-build
+  ./fuzzer -runs=$RUNS -dump_all_testcases=1  -dump_to_db=1 -config=$CONFIG_PATH -binary_id=$binary_id
 
-start_corpus_tester() {
-  # start corpus tester
-  # corpus.tester inserts all testcases in mongodb and adds their ids in
-  # rabbit queues. Corpus.tester command line parameter is the directory
-  # where we generated the testcases
-
-  echo -e "\033[0;32m[DRIVER] Starting corpus tester ..."; echo -e "\033[0m"
-  cd $CORPUS_TESTER
-  node index.js $CORPUS_DIR $binary_id > /dev/null 2>&1 &
+  # $DB_NAME contains $RUNS testcases that will be traced by DRIVER
+  NO_TESTCASES=$(mongo --eval "db.$DB_NAME.count()" | tail -n1)
+  echo -e "\033[0;32m[DRIVER] Generated $NO_TESTCASES testcases in $DB_NAME ..."; echo -e "\033[0m"
 }
 
 start_test_batcher() {
@@ -130,7 +118,6 @@ main() {
     cleanup
     generate_testcases
     start_test_batcher
-    start_corpus_tester
     start_tracer
     wait_for_termination
     print_statistics
