@@ -13,17 +13,10 @@ NODE_RIVER=$TRACER_NODE/deps/node-river
 CONFIG_PATH=$(readlink -f config.json)
 
 DB_NAME="tests_$binary_id"
-STATS_FILE=$(pwd)/logs/stats-$binary_id-$cores.csv
-LOG_FILE=$(pwd)/logs/run.log
+LOGS_DIR=$(pwd)/logs
+STATS_FILE=$LOGS_DIR/stats-$binary_id-$cores.csv
+LOG_FILE=$LOGS_DIR/run-$binary_id-$cores.log
 NO_TESTCASES=0
-
-[ ! -d $CORPUS_TESTER ] && { echo "Wrong $0 script call. Please chdir to distributed.tracer"; exit 1; }
-
-rm -f $outfile
-if [ ! -d logs ]; then
-  mkdir logs
-fi
-rm -f logs/*
 
 cleanup() {
   # clean the DRIVER build and stop node
@@ -110,6 +103,21 @@ print_statistics() {
 }
 
 main() {
+
+  [ ! -d $CORPUS_TESTER ] && { echo "Wrong $0 script call. Please chdir to distributed.tracer"; exit 1; }
+
+  if [ ! -d $LOGS_DIR ]; then
+    mkdir $LOGS_DIR
+  fi
+
+  if [ -f $STATS_FILE ]; then
+    rm -f $STATS_FILE
+  fi
+
+  if [ -f $LOG_FILE ]; then
+    rm -f $LOG_FILE
+  fi
+
   echo
   echo "River running $benchmark_runs benchmarks on http-parser"
   echo "======================================================="
