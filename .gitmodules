@@ -10,3 +10,6 @@
 [submodule "mongo.rabbit.bridge"]
 	path = mongo.rabbit.bridge
 	url = https://github.com/teodor-stoenescu/mongo.rabbit.bridge.git
+[submodule "web.interface"]
+	path = web.interface
+	url = https://github.com/teodor-stoenescu/web.interface.git
