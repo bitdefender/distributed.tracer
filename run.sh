@@ -59,7 +59,8 @@ generate_testcases() {
 
   cd $BUILD_DIR
   cd target-pcs-build
-  ./fuzzer -runs=$RUNS -dump_all_testcases=1  -dump_to_db=1 -config=$CONFIG_PATH -binary_id=$binary_id
+  export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+  ./fuzzer -runs=$RUNS -initial_corpus_db=1 -dump_all_testcases=1  -dump_to_db=1 -config=$CONFIG_PATH -binary_id=$binary_id
 
   # $DB_NAME contains $RUNS testcases that will be traced by DRIVER
   NO_TESTCASES=$(mongo --eval "db.$DB_NAME.count()" | tail -n1)
