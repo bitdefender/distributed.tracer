@@ -1,12 +1,10 @@
 #!/usr/bin/env bash
 
-[ $# -lt 7 ] && { echo "Usage: $0 [binary-id] [runs] [cores] [river-libfuzzer-path] [benchmark-runs] [(no)rebuild] [(no)regenerate-corpus]"; exit 1; }
-read binary_id runs cores rlf_path benchmark_runs rebuild regenerate_corpus <<<$@
+[ $# -lt 7 ] && { echo "Usage: $0 [fuzzer-path] [binary-id] [runs] [cores] [benchmark-runs] [(no)rebuild] [(no)regenerate-corpus]"; exit 1; }
+read fuzzer_path binary_id runs cores benchmark_runs rebuild regenerate_corpus <<<$@
 
 RUNS=$runs
 DRIVER_DIR=$(pwd)
-CORPUS_TESTER=$DRIVER_DIR/corpus.tester
-TEST_BATCHER=$DRIVER_DIR/test.batcher
 TRACER_NODE=$DRIVER_DIR/tracer.node
 NODE_RIVER=$TRACER_NODE/deps/node-river
 
@@ -46,34 +44,15 @@ cleanup() {
 }
 
 generate_testcases() {
-  RLIB_FUZZER=$rlf_path
-  cd $RLIB_FUZZER
-  BUILD_DIR=$(pwd)/../build
-
   # generate testcases
-  echo -e "\033[0;32m[DRIVER] Generating testcases using river-libfuzzer ..."; echo -e "\033[0m"
-  if [ "$regenerate_corpus" == "regenerate-corpus" ]; then
-    rm -rf $BUILD_DIR/target-pcs-build
-    ./river-scripts/build-all.sh
-  fi
+  echo -e "\033[0;32m[DRIVER] Generating testcases using $fuzzer_path ..."; echo -e "\033[0m"
 
-  cd $BUILD_DIR
-  cd target-pcs-build
   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
-  ./fuzzer -runs=$RUNS -initial_corpus_db=1 -dump_all_testcases=1  -dump_to_db=1 -config=$CONFIG_PATH -binary_id=$binary_id
+  $fuzzer_path -close_fd_mask=3 -runs=$RUNS -initial_corpus_db=1 -dump_all_testcases=1  -dump_to_db=1 -config=$CONFIG_PATH -binary_id=$binary_id
 
   # $DB_NAME contains $RUNS testcases that will be traced by DRIVER
   NO_TESTCASES=$(mongo --eval "db.$DB_NAME.count()" | tail -n1)
   echo -e "\033[0;32m[DRIVER] Generated $NO_TESTCASES testcases in $DB_NAME ..."; echo -e "\033[0m"
-}
-
-start_test_batcher() {
-  # now let's batch the testcases
-  echo -e "\033[0;32m[DRIVER] Starting test batcher ..."; echo -e "\033[0m"
-  cd $TEST_BATCHER
-  for i in $(seq 1); do
-    ( node index.js -c $CONFIG_PATH $binary_id > $LOG_FILE 2>&1 & )
-  done
 }
 
 start_tracer() {
@@ -98,9 +77,9 @@ wait_for_termination() {
 }
 
 print_statistics() {
-  fst=$(mongo --eval "db.$DB_NAME.find({}, {tracedTS:1, _id:0}).sort({tracedTS: 1}).limit(1)" | tail -n 1 | grep --only-matching --perl-regex "(?<=\"tracedTS\" : )[^ ]*")
-  lst=$(mongo --eval "db.$DB_NAME.find({}, {tracedTS:1, _id:0}).sort({tracedTS: -1}).limit(1)" | tail -n 1 | grep --only-matching --perl-regex "(?<=\"tracedTS\" : )[^ ]*")
-  printf "%30s\t%12s\t%8s\t%20s\n" "http-parser" "$NO_TESTCASES" "$cores" "$((lst - fst))" >> $STATS_FILE
+  fst=$(mongo --eval "db.$DB_NAME.find({}, {tracedTs:1, _id:0}).sort({tracedTs: 1}).limit(1)" | tail -n 1 | grep --only-matching --perl-regex "(?<=\"tracedTs\" : )[^ ]*")
+  lst=$(mongo --eval "db.$DB_NAME.find({}, {tracedTs:1, _id:0}).sort({tracedTs: -1}).limit(1)" | tail -n 1 | grep --only-matching --perl-regex "(?<=\"tracedTs\" : )[^ ]*")
+  printf "%30s\t%12s\t%8s\t%20s\n" "$binary_id" "$NO_TESTCASES" "$cores" "$((lst - fst))" >> $STATS_FILE
 }
 
 main() {
@@ -126,9 +105,8 @@ main() {
 
   for i in $(seq $benchmark_runs); do
     cleanup
-    generate_testcases
-    start_test_batcher
     start_tracer
+    generate_testcases
     wait_for_termination
     print_statistics
   done
