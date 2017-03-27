@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-[ $# -lt 7 ] && { echo "Usage: $0 [fuzzer-path] [binary-id] [runs] [cores] [benchmark-runs] [(no)rebuild] [(no)regenerate-corpus]"; exit 1; }
-read fuzzer_path binary_id runs cores benchmark_runs rebuild regenerate_corpus <<<$@
+[ $# -lt 6 ] && { echo "Usage: $0 [binary-id] [runs] [cores] [benchmark-runs] [(no)rebuild] [(no)regenerate-corpus]"; exit 1; }
+read binary_id runs cores benchmark_runs rebuild regenerate_corpus <<<$@
 
 RUNS=$runs
 DRIVER_DIR=$(pwd)
@@ -47,6 +47,18 @@ generate_testcases() {
   # generate testcases
   echo -e "\033[0;32m[DRIVER] Generating testcases using $fuzzer_path ..."; echo -e "\033[0m"
 
+  while true; do
+    if [ ! -f $fuzzer_path ]; then
+      sleep 1
+      continue
+    fi
+    busy=$(lsof $fuzzer_path)
+    if [ "$busy" == "" ]; then
+      break
+    fi
+    sleep 1
+  done
+
   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
   $fuzzer_path -close_fd_mask=3 -runs=$RUNS -initial_corpus_db=1 -dump_all_testcases=1  -dump_to_db=1 -config=$CONFIG_PATH -binary_id=$binary_id
 
@@ -63,6 +75,8 @@ start_tracer() {
   for i in $(seq $cores) ; do
     ( node index.js -c $CONFIG_PATH $binary_id > $LOG_FILE 2>&1 & )
   done
+
+  fuzzer_path=$(pwd)/$binary_id/fuzzer
 }
 
 wait_for_termination() {
