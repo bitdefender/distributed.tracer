@@ -41,8 +41,7 @@ cleanup() {
   mongo --eval "db.$DB_NAME.drop()"
 
   # purge rabbit queues
-  sudo rabbitmqctl purge_queue batchedtests
-  sudo rabbitmqctl purge_queue newtests
+  sudo rabbitmqctl purge_queue driver.newtests.$binary_id
 }
 
 generate_testcases() {
