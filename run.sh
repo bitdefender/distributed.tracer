@@ -11,9 +11,11 @@ NODE_RIVER=$TRACER_NODE/deps/node-river
 CONFIG_PATH=$(readlink -f config.json)
 
 DB_NAME="tests_$binary_id"
-LOGS_DIR=$(pwd)/logs
-STATS_FILE=$LOGS_DIR/stats-$binary_id-$cores.csv
-LOG_FILE=$LOGS_DIR/run-$binary_id-$cores.log
+LOGS_DIR=$(pwd)/logs/$binary_id
+STATS_FILE=$LOGS_DIR/stats-$cores.csv
+FUZZER_STATS_FILE=$LOGS_DIR/fuzzer-stats-$cores.csv
+LOG_FILE=$LOGS_DIR/run-$cores.log
+FUZZER_LOG_FILE=$LOGS_DIR/fuzzer-$cores.log
 NO_TESTCASES=0
 
 cleanup() {
@@ -60,7 +62,10 @@ generate_testcases() {
   done
 
   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
-  $fuzzer_path -close_fd_mask=3 -runs=$RUNS -initial_corpus_db=1 -dump_all_testcases=1  -dump_to_db=1 -config=$CONFIG_PATH -binary_id=$binary_id
+  rm -f $FUZZER_LOG_FILE
+  $fuzzer_path -close_fd_mask=3 -runs=$RUNS -initial_corpus_db=1 \
+    -dump_all_testcases=1  -dump_to_db=1 -config=$CONFIG_PATH \
+    -binary_id=$binary_id -print_final_stats=1 >> $FUZZER_LOG_FILE 2>&1
 
   # $DB_NAME contains $RUNS testcases that will be traced by DRIVER
   NO_TESTCASES=$(mongo --eval "db.$DB_NAME.count()" | tail -n1)
@@ -94,6 +99,14 @@ print_statistics() {
   fst=$(mongo --eval "db.$DB_NAME.find({}, {tracedTs:1, _id:0}).sort({tracedTs: 1}).limit(1)" | tail -n 1 | grep --only-matching --perl-regex "(?<=\"tracedTs\" : )[^ ]*")
   lst=$(mongo --eval "db.$DB_NAME.find({}, {tracedTs:1, _id:0}).sort({tracedTs: -1}).limit(1)" | tail -n 1 | grep --only-matching --perl-regex "(?<=\"tracedTs\" : )[^ ]*")
   printf "%30s\t%12s\t%8s\t%20s\n" "$binary_id" "$NO_TESTCASES" "$cores" "$((lst - fst))" >> $STATS_FILE
+
+  ## Get fuzzer stats
+  execs="$(grep 'stat::number_of_executed_units:' $FUZZER_LOG_FILE | grep -o '[0-9]*' | sort -n | tail -n1)"
+  execs_per_sec="$(grep 'stat::average_exec_per_sec:' $FUZZER_LOG_FILE | grep -o '[0-9]*' | sort -n | tail -n1)"
+  units="$(grep 'stat::new_units_added:' $FUZZER_LOG_FILE | grep -o '[0-9]*' | sort -n | tail -n1)"
+
+  printf "%30s\t%12s\t%8s\t%8s\t%8s\t%8s\n" "$binary_id" "$NO_TESTCASES" "$cores" "$execs" "$execs_per_sec" "$units" >> $FUZZER_STATS_FILE
+
 }
 
 main() {
@@ -101,7 +114,7 @@ main() {
   [ ! -d $CORPUS_TESTER ] && { echo "Wrong $0 script call. Please chdir to distributed.tracer"; exit 1; }
 
   if [ ! -d $LOGS_DIR ]; then
-    mkdir $LOGS_DIR
+    mkdir -p $LOGS_DIR
   fi
 
   if [ -f $STATS_FILE ]; then
@@ -116,6 +129,7 @@ main() {
   echo "River running $benchmark_runs benchmarks on http-parser"
   echo "======================================================="
   printf "%30s\t%12s\t%8s\t%20s\n" "name" "testcases" "cores" "time_in_ms" >> $STATS_FILE
+  printf "%30s\t%12s\t%8s\t%8s\t%8s\t%8s\n" "name" "testcases" "cores" "execs" "execs_per_sec" "units" >> $FUZZER_STATS_FILE
 
   for i in $(seq $benchmark_runs); do
     cleanup
