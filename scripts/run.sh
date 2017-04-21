@@ -33,7 +33,7 @@ cleanup() {
   for s in $services; do
     active=$(sudo systemctl status $s | grep "active (running)");
     if [ "$active" == "" ]; then
-      sudo systemctl restart mongo.rabbit.bridge.service;
+      sudo systemctl restart $s;
     fi
   done
 
