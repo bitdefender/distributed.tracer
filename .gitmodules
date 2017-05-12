@@ -13,9 +13,6 @@
 [submodule "web.interface"]
 	path = web.interface
 	url = https://github.com/teodor-stoenescu/web.interface.git
-[submodule "river-log-file-analysis"]
-	path = river-log-file-analysis
-	url = https://github.com/marius92mc/river-log-file-analysis.git
 [submodule "river.genetic"]
 	path = river.genetic
 	url = https://github.com/marius92mc/river-log-file-analysis.git
