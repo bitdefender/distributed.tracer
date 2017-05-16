@@ -26,7 +26,10 @@ FUZZER_LOG_FILE=$LOGS_DIR/fuzzer-$cores.log
 DEFUZZER_LOG_FILE=$LOGS_DIR/defuzzer-$cores.log
 GRIVER_LOG_FILE=$LOGS_DIR/river-genetic-$cores.log
 
+MONGO_URL="mongodb://worker:workwork@10.18.0.32:27017/test?authSource=admin"
+
 NO_TESTCASES=0
+FUZZER_PID=0
 
 cleanup() {
   # clean the DRIVER build and stop node
@@ -52,7 +55,7 @@ cleanup() {
   done
 
   # drop $DB_NAME mongo db
-  mongo --eval "db.$DB_NAME.drop()"
+  mongo $MONGO_URL --eval "db.$DB_NAME.drop()"
 
   # purge rabbit queues
   sudo rabbitmqctl purge_queue driver.newtests.$binary_id
@@ -94,9 +97,13 @@ generate_testcases() {
 
   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
   rm -f $FUZZER_LOG_FILE
-  $fuzzer_path -close_fd_mask=3 -initial_corpus_db=1 -dump_all_testcases=1 \
-     -dump_to_db=1 -config=$CONFIG_PATH \
+  if [ ! -d "$RESULTS_DIR/results" ]; then
+    mkdir -p "$RESULTS_DIR/results"
+  fi
+  $fuzzer_path "$RESULTS_DIR/results" -close_fd_mask=3 \
+     -dump_to_db=1 -config=$CONFIG_PATH -max_total_time=1800 -max_len=1024 \
     -binary_id=$binary_id -print_final_stats=1 >> $FUZZER_LOG_FILE 2>&1 &
+  FUZZER_PID=$!
 
   echo -e "\033[0;32m[DRIVER] Started fuzzer to generate interesting testcases for genetic river ..."; echo -e "\033[0m"
 }
@@ -145,11 +152,15 @@ start_griver() {
 
 wait_for_termination() {
   while true; do
-    left=$( mongo --eval "db.$DB_NAME.find({state : \"traced\"}).count()" 2> /dev/null | tail -n1; \
+    left=$( mongo $MONGO_URL --eval "db.$DB_NAME.find({state : \"traced\"}).count()" 2> /dev/null | tail -n1; \
       exitcode=${PIPESTATUS[0]}; if test $exitcode -ne 0; then echo -n -1; fi )
     if [ $left -lt 0 ]; then
       echo -e "\033[0;32m[DRIVER] Mongo could not connect. Exiting...."; echo -e "\033[0m"
-      sleep 30
+      sleep 120
+      break
+    fi
+    if ! kill -0 $FUZZER_PID > /dev/null 2>&1 ; then
+      echo -e "\033[0;32m[DRIVER] Source fuzzer exited. Exiting...."; echo -e "\033[0m"
       break
     fi
     sleep 3 #todo fix this
@@ -159,8 +170,8 @@ wait_for_termination() {
 
 print_statistics() {
   sleep 10
-  fst=$(mongo --eval "db.$DB_NAME.find({}, {tracedTs:1, _id:0}).sort({tracedTs: 1}).limit(1)" | tail -n 1 | grep --only-matching --perl-regex "(?<=\"tracedTs\" : )[^ ]*")
-  lst=$(mongo --eval "db.$DB_NAME.find({}, {tracedTs:1, _id:0}).sort({tracedTs: -1}).limit(1)" | tail -n 1 | grep --only-matching --perl-regex "(?<=\"tracedTs\" : )[^ ]*")
+  fst=$(mongo $MONGO_URL --eval "db.$DB_NAME.find({}, {tracedTs:1, _id:0}).sort({tracedTs: 1}).limit(1)" | tail -n 1 | grep --only-matching --perl-regex "(?<=\"tracedTs\" : )[^ ]*")
+  lst=$(mongo $MONGO_URL --eval "db.$DB_NAME.find({}, {tracedTs:1, _id:0}).sort({tracedTs: -1}).limit(1)" | tail -n 1 | grep --only-matching --perl-regex "(?<=\"tracedTs\" : )[^ ]*")
   printf "%30s\t%12s\t%8s\t%20s\n" "$binary_id" "$NO_TESTCASES" "$cores" "$((lst - fst))" >> $STATS_FILE
 
   ## Get fuzzer stats
@@ -184,7 +195,7 @@ evaluate_new_corpus() {
   ## The result is a set of (testcaseId, coverage) dumped in csv
 
   ## run all testcases and do not add anything new
-  $fuzzer_path $RESULTS_DIR -close_fd_mask=3 -runs=$RUNS \
+  $fuzzer_path $RESULTS_DIR/results -close_fd_mask=3 -runs=$RUNS -max_len=1024 \
     -print_final_stats=1 >> $DEFUZZER_LOG_FILE 2>&1
 
   ### 131072pulse  cov: 53 ft: 83 corp: 51/1011b exec/s: 65536 rss:  40Mb
@@ -231,6 +242,12 @@ main() {
     wait_for_termination
     print_statistics
     evaluate_new_corpus
+
+    ## cleanup
+    killall -9 node
+    killall -9 python3
+    sudo systemctl stop mongo.rabbit.bridge
+
   done
 }
 
