@@ -7,6 +7,7 @@ RUNS=$runs
 DRIVER_DIR=$(pwd)
 GRIVER=$DRIVER_DIR/river.genetic
 TRACER_NODE=$DRIVER_DIR/tracer.node
+PROCESS_MANAGER=$DRIVER_DIR/process.manager
 NODE_RIVER=$TRACER_NODE/deps/node-river
 
 CONFIG_PATH=$(readlink -f config.json)
@@ -31,10 +32,31 @@ MONGO_URL="mongodb://worker:workwork@10.18.0.32:27017/test?authSource=admin"
 NO_TESTCASES=0
 FUZZER_PID=0
 
+start_tracer() {
+  # start the desired number of node river running processes
+  echo -e "\033[0;32m[DRIVER] Starting $cores processes of node RIVER ..."; echo -e "\033[0m"
+  #cd $TRACER_NODE
+  #export LD_LIBRARY_PATH=$NODE_RIVER/lib
+  #for i in $(seq $cores) ; do
+  #  ( node index.js -c $CONFIG_PATH $binary_id > $LOG_FILE 2>&1 & )
+  #done
+  cd $PROCESS_MANAGER
+  node ./pmcli.js start $binary_id $cores
+
+  fuzzer_path=$(pwd)/$binary_id/fuzzer
+}
+
+stop_tracer() {
+  echo -e "\033[0;32m[DRIVER] Stopping processes of node RIVER ..."; echo -e "\033[0m"
+  cd $PROCESS_MANAGER
+
+  node ./pmcli.js stop $binary_id
+}
+
 cleanup() {
   # clean the DRIVER build and stop node
   echo -e "\033[0;32m[DRIVER] Cleaning DRIVER environment ..."; echo -e "\033[0m"
-  killall -9 node
+  stop_tracer
   killall -9 fuzzer
   if [ "$genetic" == "genetic" ]; then
     killall -9 python3
@@ -72,7 +94,7 @@ sigint_handler()
   echo -e "\033[0;32m[DRIVER] Received SIGINT. Cleaning DRIVER environment ..."; echo -e "\033[0m"
 
   sudo systemctl stop mongo.rabbit.bridge
-  killall -9 node
+  stop_tracer
   killall -9 fuzzer
   killall -9 python3
 
@@ -106,18 +128,6 @@ generate_testcases() {
   FUZZER_PID=$!
 
   echo -e "\033[0;32m[DRIVER] Started fuzzer to generate interesting testcases for genetic river ..."; echo -e "\033[0m"
-}
-
-start_tracer() {
-  # start the desired number of node river running processes
-  echo -e "\033[0;32m[DRIVER] Starting $cores processes of node RIVER ..."; echo -e "\033[0m"
-  cd $TRACER_NODE
-  export LD_LIBRARY_PATH=$NODE_RIVER/lib
-  for i in $(seq $cores) ; do
-    ( node index.js -c $CONFIG_PATH $binary_id > $LOG_FILE 2>&1 & )
-  done
-
-  fuzzer_path=$(pwd)/$binary_id/fuzzer
 }
 
 griver_environment() {
@@ -244,7 +254,7 @@ main() {
     evaluate_new_corpus
 
     ## cleanup
-    killall -9 node
+    stop_tracer
     killall -9 python3
     sudo systemctl stop mongo.rabbit.bridge
 
