@@ -41,7 +41,7 @@ start_tracer() {
   #  ( node index.js -c $CONFIG_PATH $binary_id > $LOG_FILE 2>&1 & )
   #done
   cd $PROCESS_MANAGER
-  node ./pmcli.js start $binary_id $cores
+  env HOME=/var/pm2 node ./pmcli.js start $binary_id $cores
 
   fuzzer_path=$(pwd)/$binary_id/fuzzer
 }
@@ -50,7 +50,7 @@ stop_tracer() {
   echo -e "\033[0;32m[DRIVER] Stopping processes of node RIVER ..."; echo -e "\033[0m"
   cd $PROCESS_MANAGER
 
-  node ./pmcli.js stop $binary_id
+  env HOME=/var/pm2 node ./pmcli.js stop $binary_id
 }
 
 cleanup() {
