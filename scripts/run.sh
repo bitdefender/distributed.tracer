@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-[ $# -lt 6 ] && { echo "Usage: $0 [binary-id] [runs] [cores] [benchmark-runs] [(no)rebuild] [(no)regenerate-corpus] [genetic]"; exit 1; }
-read binary_id runs cores benchmark_runs rebuild regenerate_corpus genetic<<<$@
+[ $# -ne 6 ] && { echo "Usage: $0 [binary-id] [runs] [cores] [benchmark-runs] [(no)rebuild] [genetic]"; exit 1; }
+read binary_id runs cores benchmark_runs rebuild  genetic<<<$@
 
 RUNS=$runs
 DRIVER_DIR=$(pwd)
@@ -9,6 +9,7 @@ GRIVER=$DRIVER_DIR/river.genetic
 TRACER_NODE=$DRIVER_DIR/tracer.node
 PROCESS_MANAGER=$DRIVER_DIR/process.manager
 NODE_RIVER=$TRACER_NODE/deps/node-river
+FUZZER_PATH=$TRACER_NODE/$binary_id/fuzzer
 
 CONFIG_PATH=$(readlink -f config.json)
 
@@ -22,7 +23,6 @@ STATS_FILE=$LOGS_DIR/stats-$cores.csv
 FUZZER_STATS_FILE=$LOGS_DIR/fuzzer-stats-$cores.csv
 GRIVER_STATS=$LOGS_DIR/river-genetic-fuzzer-$cores.csv
 BASELINE=$LOGS_DIR/baseline-$cores.csv
-LOG_FILE=$LOGS_DIR/run-$cores.log
 FUZZER_LOG_FILE=$LOGS_DIR/fuzzer-$cores.log
 DEFUZZER_LOG_FILE=$LOGS_DIR/defuzzer-$cores.log
 GRIVER_LOG_FILE=$LOGS_DIR/river-genetic-$cores.log
@@ -35,15 +35,10 @@ FUZZER_PID=0
 start_tracer() {
   # start the desired number of node river running processes
   echo -e "\033[0;32m[DRIVER] Starting $cores processes of node RIVER ..."; echo -e "\033[0m"
-  #cd $TRACER_NODE
-  #export LD_LIBRARY_PATH=$NODE_RIVER/lib
-  #for i in $(seq $cores) ; do
-  #  ( node index.js -c $CONFIG_PATH $binary_id > $LOG_FILE 2>&1 & )
-  #done
   cd $PROCESS_MANAGER
   env HOME=/var/pm2 node ./pmcli.js start $binary_id $cores
 
-  fuzzer_path=$(pwd)/$binary_id/fuzzer
+  cd -
 }
 
 stop_tracer() {
@@ -51,6 +46,7 @@ stop_tracer() {
   cd $PROCESS_MANAGER
 
   env HOME=/var/pm2 node ./pmcli.js stop $binary_id
+  cd -
 }
 
 cleanup() {
@@ -92,6 +88,8 @@ cleanup() {
 sigint_handler()
 {
   echo -e "\033[0;32m[DRIVER] Received SIGINT. Cleaning DRIVER environment ..."; echo -e "\033[0m"
+  print_statistics
+  evaluate_new_corpus
 
   sudo systemctl stop mongo.rabbit.bridge
   stop_tracer
@@ -103,14 +101,14 @@ sigint_handler()
 
 generate_testcases() {
   # generate testcases
-  echo -e "\033[0;32m[DRIVER] Generating testcases using $fuzzer_path ..."; echo -e "\033[0m"
+  echo -e "\033[0;32m[DRIVER] Generating testcases using $FUZZER_PATH ..."; echo -e "\033[0m"
 
   while true; do
-    if [ ! -f $fuzzer_path ]; then
+    if [ ! -f $FUZZER_PATH ]; then
       sleep 1
       continue
     fi
-    busy=$(lsof $fuzzer_path 2> /dev/null )
+    busy=$(lsof $FUZZER_PATH 2> /dev/null )
     if [ "$busy" == "" ]; then
       break
     fi
@@ -122,8 +120,8 @@ generate_testcases() {
   if [ ! -d "$RESULTS_DIR/results" ]; then
     mkdir -p "$RESULTS_DIR/results"
   fi
-  $fuzzer_path "$RESULTS_DIR/results" -close_fd_mask=3 \
-     -dump_to_db=1 -config=$CONFIG_PATH -max_total_time=1800 -max_len=1024 \
+  $FUZZER_PATH "$RESULTS_DIR/results" -close_fd_mask=3 \
+     -dump_to_db=1 -config=$CONFIG_PATH -max_len=1024 \
     -binary_id=$binary_id -print_final_stats=1 >> $FUZZER_LOG_FILE 2>&1 &
   FUZZER_PID=$!
 
@@ -173,8 +171,8 @@ wait_for_termination() {
       echo -e "\033[0;32m[DRIVER] Source fuzzer exited. Exiting...."; echo -e "\033[0m"
       break
     fi
-    sleep 3 #todo fix this
-    echo "Tracing progress: found [$left] testcases traced."
+    sleep 20 #todo fix this
+    echo "pulse: Tracing progress: found [$left] testcases traced."
   done
 }
 
@@ -205,7 +203,7 @@ evaluate_new_corpus() {
   ## The result is a set of (testcaseId, coverage) dumped in csv
 
   ## run all testcases and do not add anything new
-  $fuzzer_path $RESULTS_DIR/results -close_fd_mask=3 -runs=$RUNS -max_len=1024 \
+  $FUZZER_PATH $RESULTS_DIR/results -close_fd_mask=3 -runs=$RUNS -max_len=1024 \
     -print_final_stats=1 >> $DEFUZZER_LOG_FILE 2>&1
 
   ### 131072pulse  cov: 53 ft: 83 corp: 51/1011b exec/s: 65536 rss:  40Mb
@@ -228,10 +226,6 @@ main() {
 
   if [ -f $STATS_FILE ]; then
     rm -f $STATS_FILE
-  fi
-
-  if [ -f $LOG_FILE ]; then
-    rm -f $LOG_FILE
   fi
 
   echo
