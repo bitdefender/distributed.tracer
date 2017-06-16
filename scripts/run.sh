@@ -3,7 +3,6 @@
 [ $# -ne 6 ] && { echo "Usage: $0 [binary-id] [runs] [cores] [benchmark-runs] [(no)rebuild] [genetic]"; exit 1; }
 read binary_id runs cores benchmark_runs rebuild  genetic<<<$@
 
-RUNS=$runs
 DRIVER_DIR=$(pwd)
 GRIVER=$DRIVER_DIR/river.genetic
 TRACER_NODE=$DRIVER_DIR/tracer.node
@@ -17,26 +16,18 @@ DB_NAME="tests_$binary_id"
 
 ID_LOGS_DIR=$(pwd)/$binary_id
 LOGS_DIR=$ID_LOGS_DIR/logs
+GRIVER_LOG_FILE=$LOGS_DIR/griver.log
 RESULTS_DIR=$ID_LOGS_DIR/results
-
-STATS_FILE=$LOGS_DIR/stats-$cores.csv
-FUZZER_STATS_FILE=$LOGS_DIR/fuzzer-stats-$cores.csv
-GRIVER_STATS=$LOGS_DIR/river-genetic-fuzzer-$cores.csv
-BASELINE=$LOGS_DIR/baseline-$cores.csv
-FUZZER_LOG_FILE=$LOGS_DIR/fuzzer-$cores.log
-DEFUZZER_LOG_FILE=$LOGS_DIR/defuzzer-$cores.log
-GRIVER_LOG_FILE=$LOGS_DIR/river-genetic-$cores.log
 
 MONGO_URL="mongodb://worker:workwork@10.18.0.32:27017/test?authSource=admin"
 
 NO_TESTCASES=0
-FUZZER_PID=0
 
 start_tracer() {
   # start the desired number of node river running processes
   echo -e "\033[0;32m[DRIVER] Starting $cores processes of node RIVER ..."; echo -e "\033[0m"
   cd $PROCESS_MANAGER
-  env HOME=/var/pm2 node ./pmcli.js start $binary_id $cores
+  node ./pmcli.js start tracer.node $binary_id $cores
 
   cd -
 }
@@ -45,7 +36,16 @@ stop_tracer() {
   echo -e "\033[0;32m[DRIVER] Stopping processes of node RIVER ..."; echo -e "\033[0m"
   cd $PROCESS_MANAGER
 
-  env HOME=/var/pm2 node ./pmcli.js stop $binary_id
+  node ./pmcli.js stop tracer.node $binary_id
+  cd -
+}
+
+stop_fuzzers() {
+  echo -e "\033[0;32m[DRIVER] Stopping fuzzers ..."; echo -e "\033[0m"
+  cd $PROCESS_MANAGER
+  node ./pmcli.js stop basic.fuzzer $binary_id
+  node ./pmcli.js stop fast.fuzzer $binary_id
+  node ./pmcli.js stop eval.fuzzer $binary_id
   cd -
 }
 
@@ -53,7 +53,7 @@ cleanup() {
   # clean the DRIVER build and stop node
   echo -e "\033[0;32m[DRIVER] Cleaning DRIVER environment ..."; echo -e "\033[0m"
   stop_tracer
-  killall -9 fuzzer
+  stop_fuzzers
   if [ "$genetic" == "genetic" ]; then
     killall -9 python3
   fi
@@ -88,12 +88,11 @@ cleanup() {
 sigint_handler()
 {
   echo -e "\033[0;32m[DRIVER] Received SIGINT. Cleaning DRIVER environment ..."; echo -e "\033[0m"
-  print_statistics
   evaluate_new_corpus
 
   sudo systemctl stop mongo.rabbit.bridge
   stop_tracer
-  killall -9 fuzzer
+  stop_fuzzers
   killall -9 python3
 
   exit 1
@@ -116,14 +115,13 @@ generate_testcases() {
   done
 
   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
-  rm -f $FUZZER_LOG_FILE
   if [ ! -d "$RESULTS_DIR/results" ]; then
     mkdir -p "$RESULTS_DIR/results"
   fi
-  $FUZZER_PATH "$RESULTS_DIR/results" -close_fd_mask=3 \
-     -dump_to_db=1 -config=$CONFIG_PATH -max_len=1024 \
-    -binary_id=$binary_id -print_final_stats=1 >> $FUZZER_LOG_FILE 2>&1 &
-  FUZZER_PID=$!
+
+  cd $PROCESS_MANAGER
+  node ./pmcli.js start fast.fuzzer $binary_id 1
+  cd -
 
   echo -e "\033[0;32m[DRIVER] Started fuzzer to generate interesting testcases for genetic river ..."; echo -e "\033[0m"
 }
@@ -167,7 +165,10 @@ wait_for_termination() {
       sleep 120
       break
     fi
-    if ! kill -0 $FUZZER_PID > /dev/null 2>&1 ; then
+    cd $PROCESS_MANAGER
+    fuzzers_running=$(node ./pmcli.js status fast.fuzzer | grep "fast.fuzzer:" | awk '{print $2}')
+    cd -
+    if [ $fuzzers_running == 0 ]; then
       echo -e "\033[0;32m[DRIVER] Source fuzzer exited. Exiting...."; echo -e "\033[0m"
       break
     fi
@@ -176,20 +177,6 @@ wait_for_termination() {
   done
 }
 
-print_statistics() {
-  sleep 10
-  fst=$(mongo $MONGO_URL --eval "db.$DB_NAME.find({}, {tracedTs:1, _id:0}).sort({tracedTs: 1}).limit(1)" | tail -n 1 | grep --only-matching --perl-regex "(?<=\"tracedTs\" : )[^ ]*")
-  lst=$(mongo $MONGO_URL --eval "db.$DB_NAME.find({}, {tracedTs:1, _id:0}).sort({tracedTs: -1}).limit(1)" | tail -n 1 | grep --only-matching --perl-regex "(?<=\"tracedTs\" : )[^ ]*")
-  printf "%30s\t%12s\t%8s\t%20s\n" "$binary_id" "$NO_TESTCASES" "$cores" "$((lst - fst))" >> $STATS_FILE
-
-  ## Get fuzzer stats
-  execs="$(grep 'stat::number_of_executed_units:' $FUZZER_LOG_FILE | grep -o '[0-9]*' | sort -n | tail -n1)"
-  execs_per_sec="$(grep 'stat::average_exec_per_sec:' $FUZZER_LOG_FILE | grep -o '[0-9]*' | sort -n | tail -n1)"
-  units="$(grep 'stat::new_units_added:' $FUZZER_LOG_FILE | grep -o '[0-9]*' | sort -n | tail -n1)"
-
-  printf "%30s\t%12s\t%8s\t%8s\t%8s\t%8s\n" "$binary_id" "$NO_TESTCASES" "$cores" "$execs" "$execs_per_sec" "$units" >> $FUZZER_STATS_FILE
-
-}
 
 evaluate_new_corpus() {
   ## Driver is a system that uses testcases in order to generate new ones.
@@ -203,17 +190,20 @@ evaluate_new_corpus() {
   ## The result is a set of (testcaseId, coverage) dumped in csv
 
   ## run all testcases and do not add anything new
-  $FUZZER_PATH $RESULTS_DIR/results -close_fd_mask=3 -runs=$RUNS -max_len=1024 \
-    -print_final_stats=1 >> $DEFUZZER_LOG_FILE 2>&1
 
-  ### 131072pulse  cov: 53 ft: 83 corp: 51/1011b exec/s: 65536 rss:  40Mb
-  pulsecov="$(grep -o '#[0-9]*[^p]*[pulse\|NEW] *cov: [0-9]*' $DEFUZZER_LOG_FILE | grep -P  '(\d+)' -o)"
-  ### pulsecov is like (id\ncov\nid\ncov ...)
-  printf "%20s\t%8s\n" $pulsecov >> $GRIVER_STATS
+  cd $PROCESS_MANAGER
+  node ./pmcli.js start eval.fuzzer $binary_id 1
+  cd -
 
-  pc="$(grep -o '#[0-9]*[^p]*[pulse\|NEW] *cov: [0-9]*' $FUZZER_LOG_FILE | grep -P  '(\d+)' -o)"
-  ### pulsecov is like (id\ncov\nid\ncov ...)
-  printf "%20s\t%8s\n" $pc >> $BASELINE
+  cd $PROCESS_MANAGER
+  while true; do
+    fuzzers_running=$(node ./pmcli.js status eval.fuzzer | grep "eval.fuzzer:" | awk '{print $2}')
+    if [ $fuzzers_running == 0 ]; then
+      break
+    fi
+    sleep 5
+  done
+  cd -
 }
 
 main() {
@@ -224,17 +214,9 @@ main() {
     mkdir -p $LOGS_DIR
   fi
 
-  if [ -f $STATS_FILE ]; then
-    rm -f $STATS_FILE
-  fi
-
   echo
   echo "River running $benchmark_runs benchmarks on http-parser"
   echo "======================================================="
-  printf "%30s\t%12s\t%8s\t%20s\n" "name" "testcases" "cores" "time_in_ms" >> $STATS_FILE
-  printf "%30s\t%12s\t%8s\t%8s\t%8s\t%8s\n" "name" "testcases" "cores" "execs" "execs_per_sec" "units" >> $FUZZER_STATS_FILE
-  printf "%20s\t%8s\n" "testcaseid" "cov" >> $GRIVER_STATS
-  printf "%20s\t%8s\n" "testcaseid" "cov" >> $BASELINE
 
   for i in $(seq $benchmark_runs); do
     cleanup
@@ -244,11 +226,11 @@ main() {
     fi
     generate_testcases
     wait_for_termination
-    print_statistics
     evaluate_new_corpus
 
     ## cleanup
     stop_tracer
+    stop_fuzzers
     killall -9 python3
     sudo systemctl stop mongo.rabbit.bridge
 
