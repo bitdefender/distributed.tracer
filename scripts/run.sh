@@ -4,7 +4,6 @@
 read binary_id runs cores benchmark_runs rebuild  genetic<<<$@
 
 DRIVER_DIR=$(pwd)
-GRIVER=$DRIVER_DIR/river.genetic
 TRACER_NODE=$DRIVER_DIR/tracer.node
 PROCESS_MANAGER=$DRIVER_DIR/process.manager
 NODE_RIVER=$TRACER_NODE/deps/node-river
@@ -16,7 +15,6 @@ DB_NAME="tests_$binary_id"
 
 ID_LOGS_DIR=$(pwd)/$binary_id
 LOGS_DIR=$ID_LOGS_DIR/logs
-GRIVER_LOG_FILE=$LOGS_DIR/griver.log
 RESULTS_DIR=$ID_LOGS_DIR/results
 
 MONGO_URL="mongodb://worker:workwork@10.18.0.32:27017/test?authSource=admin"
@@ -49,13 +47,20 @@ stop_fuzzers() {
   cd -
 }
 
+stop_griver() {
+  echo -e "\033[0;32m[DRIVER] Stopping genetic river ..."; echo -e "\033[0m"
+  cd $PROCESS_MANAGER
+  node ./pmcli.js stop griver $binary_id
+  cd -
+}
+
 cleanup() {
   # clean the DRIVER build and stop node
   echo -e "\033[0;32m[DRIVER] Cleaning DRIVER environment ..."; echo -e "\033[0m"
   stop_tracer
   stop_fuzzers
   if [ "$genetic" == "genetic" ]; then
-    killall -9 python3
+    stop_griver
   fi
 
   if [ "$rebuild" == "rebuild" ]; then
@@ -93,7 +98,7 @@ sigint_handler()
   sudo systemctl stop mongo.rabbit.bridge
   stop_tracer
   stop_fuzzers
-  killall -9 python3
+  stop_griver
 
   exit 1
 }
@@ -126,34 +131,11 @@ generate_testcases() {
   echo -e "\033[0;32m[DRIVER] Started fuzzer to generate interesting testcases for genetic river ..."; echo -e "\033[0m"
 }
 
-griver_environment() {
-  ## genetic alg setup
-  ## TODO get rid of this stuff
-  export SPARK_HOME=/data/spark/spark-2.0.1-bin-hadoop2.7
-  export PYSPARK_PYTHON=python3
-  export PYSPARK_DRIVER_PYTHON=python3
-  export PYTHONPATH=$SPARK_HOME/python:$SPARK_HOME/python/lib/py4j-0.10.3-src.zip
-  export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64
-  export SPARK_WORKER_DIR=/data/spark_worker_dir
-  export SPARK_EXECUTOR_INSTANCES=2
-  export SCALA_HOME=/usr/share/scala/lib
-  export SPARK_LOCAL_IP=10.18.0.32
-
-  export PYTHONUNBUFFERED=1
-  export SIMPLETRACERLOGSPATH=$RESULTS_DIR
-  #export LD_LIBRARY_PATH=/data/simpletracer/build-river-tools/lib
-  #export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/data/simpletracer/river.sdk/lin/lib
-  #export SIMPLETRACERPATH=/data/simpletracer/build-river-tools/bin/simple_tracer
-}
-
 start_griver() {
   echo -e "\033[0;32m[DRIVER] Starting river genetic for $binary_id executable..."; echo -e "\033[0m"
-  cd $GRIVER
-  griver_environment
-  ( python3 ./genetic_code/main.py --testsFolderCount 10 --numTasks 1 \
-      --isParallelExecution 0 --populationSize 10 --numberOfIterations 10 \
-      --config $CONFIG_PATH --driver 1  --isDebugEnabled 1 \
-      --executableId $binary_id > $GRIVER_LOG_FILE 2>&1 &)
+  cd $PROCESS_MANAGER
+  node ./pmcli.js start griver $binary_id 1
+  cd -
 }
 
 wait_for_termination() {
@@ -231,7 +213,7 @@ main() {
     ## cleanup
     stop_tracer
     stop_fuzzers
-    killall -9 python3
+    stop_griver
     sudo systemctl stop mongo.rabbit.bridge
 
   done
