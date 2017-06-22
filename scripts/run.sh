@@ -12,6 +12,7 @@ FUZZER_PATH=$TRACER_NODE/$binary_id/fuzzer
 CONFIG_PATH=$(readlink -f config.json)
 
 DB_NAME="tests_$binary_id"
+GRIDFS_NAME="trace_$binary_id"
 
 ID_LOGS_DIR=$(pwd)/$binary_id
 LOGS_DIR=$ID_LOGS_DIR/logs
@@ -80,6 +81,8 @@ cleanup() {
 
   # drop $DB_NAME mongo db
   mongo $MONGO_URL --eval "db.$DB_NAME.drop()"
+  mongo $MONGO_URL --eval "db.$GRIDFS_NAME.files.drop()"
+  mongo $MONGO_URL --eval "db.$GRIDFS_NAME.chunks.drop()"
 
   # purge rabbit queues
   sudo rabbitmqctl purge_queue driver.newtests.$binary_id
