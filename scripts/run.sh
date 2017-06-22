@@ -86,7 +86,7 @@ cleanup() {
 
   # remove results dumped to disk
   if [ -d $RESULTS_DIR ]; then
-    rm -rf $RESULTS_DIR
+    sudo rm -rf $RESULTS_DIR
   fi
 }
 
