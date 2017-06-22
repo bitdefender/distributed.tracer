@@ -74,6 +74,7 @@ cleanup() {
     active=$(sudo systemctl status $s | grep "active (running)");
     if [ "$active" == "" ]; then
       sudo systemctl restart $s;
+      echo -e "\033[0;32m[DRIVER] Restarted service: $s ..."; echo -e "\033[0m"
     fi
   done
 
@@ -125,7 +126,7 @@ generate_testcases() {
   fi
 
   cd $PROCESS_MANAGER
-  node ./pmcli.js start fast.fuzzer $binary_id 1
+  node ./pmcli.js start fast.fuzzer $binary_id 1 -runs=$runs
   cd -
 
   echo -e "\033[0;32m[DRIVER] Started fuzzer to generate interesting testcases for genetic river ..."; echo -e "\033[0m"
@@ -174,7 +175,7 @@ evaluate_new_corpus() {
   ## run all testcases and do not add anything new
 
   cd $PROCESS_MANAGER
-  node ./pmcli.js start eval.fuzzer $binary_id 1
+  node ./pmcli.js start eval.fuzzer $binary_id 1 -runs=$runs
   cd -
 
   cd $PROCESS_MANAGER
