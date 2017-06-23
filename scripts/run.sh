@@ -74,8 +74,8 @@ cleanup() {
   for s in $services; do
     active=$(systemctl status $s | grep "active (running)");
     if [ "$active" == "" ]; then
-      sudo systemctl restart $s;
-      echo -e "\033[0;32m[DRIVER] Restarted service: $s ..."; echo -e "\033[0m"
+      echo -e "\033[0;31m[DRIVER] Service: $s is not running. Restart and rerun script!"; echo -e "\033[0m"
+      exit 1
     fi
   done
 
@@ -85,8 +85,8 @@ cleanup() {
   mongo $MONGO_URL --eval "db.$GRIDFS_NAME.chunks.drop()"
 
   # purge rabbit queues
-  sudo rabbitmqctl purge_queue driver.newtests.$binary_id
-  sudo rabbitmqctl purge_queue driver.tracedtests.$binary_id
+  rabbitmqadmin purge queue name=driver.newtests.$binary_id
+  rabbitmqadmin purge queue name=driver.tracedtests.$binary_id
 
   # remove results dumped to disk
   if [ -d $RESULTS_DIR ]; then
@@ -146,7 +146,7 @@ wait_for_termination() {
     left=$( mongo $MONGO_URL --eval "db.$DB_NAME.find({state : \"traced\"}).count()" 2> /dev/null | tail -n1; \
       exitcode=${PIPESTATUS[0]}; if test $exitcode -ne 0; then echo -n -1; fi )
     if [ $left -lt 0 ]; then
-      echo -e "\033[0;32m[DRIVER] Mongo could not connect. Exiting...."; echo -e "\033[0m"
+      echo -e "\033[0;31m[DRIVER] Mongo could not connect. Exiting...."; echo -e "\033[0m"
       sleep 120
       break
     fi
@@ -154,7 +154,7 @@ wait_for_termination() {
     fuzzers_running=$(node ./pmcli.js status fast.fuzzer | grep "fast.fuzzer:" | awk '{print $2}')
     cd -
     if [ $fuzzers_running == 0 ]; then
-      echo -e "\033[0;32m[DRIVER] Source fuzzer exited. Exiting...."; echo -e "\033[0m"
+      echo -e "\033[0;31m[DRIVER] Source fuzzer exited. Exiting...."; echo -e "\033[0m"
       break
     fi
     sleep 20 #todo fix this
