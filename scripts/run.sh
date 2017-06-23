@@ -69,10 +69,10 @@ cleanup() {
     cd $TRACER_NODE && rm -rf node_modules/node-river/ && npm install
   fi
 
-  services="mongod.service rabbitmq-server.service mongo.rabbit.bridge.service"
+  services="mongod.service rabbitmq-server.service"
 
   for s in $services; do
-    active=$(sudo systemctl status $s | grep "active (running)");
+    active=$(systemctl status $s | grep "active (running)");
     if [ "$active" == "" ]; then
       sudo systemctl restart $s;
       echo -e "\033[0;32m[DRIVER] Restarted service: $s ..."; echo -e "\033[0m"
@@ -90,7 +90,7 @@ cleanup() {
 
   # remove results dumped to disk
   if [ -d $RESULTS_DIR ]; then
-    sudo rm -rf $RESULTS_DIR
+    rm -rf $RESULTS_DIR
   fi
 }
 
@@ -99,7 +99,6 @@ sigint_handler()
   echo -e "\033[0;32m[DRIVER] Received SIGINT. Cleaning DRIVER environment ..."; echo -e "\033[0m"
   evaluate_new_corpus
 
-  sudo systemctl stop mongo.rabbit.bridge
   stop_tracer
   stop_fuzzers
   stop_griver
@@ -218,7 +217,6 @@ main() {
     stop_tracer
     stop_fuzzers
     stop_griver
-    sudo systemctl stop mongo.rabbit.bridge
 
   done
 }
