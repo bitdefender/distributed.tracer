@@ -157,7 +157,7 @@ wait_for_termination() {
       echo -e "\033[0;31m[DRIVER] Source fuzzer exited. Exiting...."; echo -e "\033[0m"
       break
     fi
-    sleep 20 #todo fix this
+    sleep 10 #todo fix this
     echo "pulse: Tracing progress: found [$left] testcases traced."
   done
 }
