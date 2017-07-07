@@ -19,3 +19,6 @@
 [submodule "process.manager"]
 	path = process.manager
 	url = https://github.com/teodor-stoenescu/process.manager.git
+[submodule "state.manager"]
+	path = state.manager
+	url = https://github.com/teodor-stoenescu/state.manager.git
