@@ -128,7 +128,7 @@ generate_testcases() {
   fi
 
   cd $PROCESS_MANAGER
-  node ./pmcli.js start fast.fuzzer $binary_id 1 -runs=$runs
+  node ./pmcli.js start basic.fuzzer $binary_id 1 -runs=$runs
   cd -
 
   echo -e "\033[0;32m[DRIVER] Started fuzzer to generate interesting testcases for genetic river ..."; echo -e "\033[0m"
@@ -151,7 +151,7 @@ wait_for_termination() {
       break
     fi
     cd $PROCESS_MANAGER
-    fuzzers_running=$(node ./pmcli.js status fast.fuzzer | grep "fast.fuzzer:" | awk '{print $2}')
+    fuzzers_running=$(node ./pmcli.js status basic.fuzzer | grep "basic.fuzzer:" | awk '{print $2}')
     cd -
     if [ $fuzzers_running == 0 ]; then
       echo -e "\033[0;31m[DRIVER] Source fuzzer exited. Exiting...."; echo -e "\033[0m"
