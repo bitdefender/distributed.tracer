@@ -7,6 +7,8 @@ DRIVER_DIR=$(pwd)
 TRACER_NODE=$DRIVER_DIR/tracer.node
 PROCESS_MANAGER=$DRIVER_DIR/process.manager
 NODE_RIVER=$TRACER_NODE/deps/node-river
+STATE_AGG=$DRIVER_DIR/state.aggregator
+STATE_MANAGER=$DRIVER/state.manager
 FUZZER_PATH=$TRACER_NODE/$binary_id/fuzzer
 CORPUS_PATH=$TRACER_NODE/$binary_id/corpus
 CORPUS_DIR=$TRACER_NODE/$binary_id/corpus-dir
@@ -30,6 +32,12 @@ start_tracer() {
   cd $PROCESS_MANAGER
   node ./pmcli.js start tracer.node $binary_id $cores
 
+  cd -
+}
+
+start_state_aggregator() {
+  cd $STATE_AGG
+  node index.js -c ../config.json $binary_id
   cd -
 }
 
@@ -82,9 +90,12 @@ cleanup() {
   done
 
   # drop $DB_NAME mongo db
-  mongo $MONGO_URL --eval "db.$DB_NAME.drop()"
-  mongo $MONGO_URL --eval "db.$GRIDFS_NAME.files.drop()"
-  mongo $MONGO_URL --eval "db.$GRIDFS_NAME.chunks.drop()"
+  #mongo $MONGO_URL --eval "db.$DB_NAME.drop()"
+  #mongo $MONGO_URL --eval "db.$GRIDFS_NAME.files.drop()"
+  #mongo $MONGO_URL --eval "db.$GRIDFS_NAME.chunks.drop()"
+  cd $STATE_MANAGER
+  node statecli.js -c ../config.json $binary_id purge
+  cd -
 
   # purge rabbit queues
   rabbitmqadmin purge queue name=driver.newtests.$binary_id
@@ -214,6 +225,7 @@ main() {
   for i in $(seq $benchmark_runs); do
     cleanup
     init_corpus
+    start_state_aggregator
     start_tracer
     if [ "$genetic" == "genetic" ]; then
       start_griver
