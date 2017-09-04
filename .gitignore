@@ -34,3 +34,6 @@ include/
 
 # Explicitly exclude configuration files
 config.json
+
+# Extra
+setup-initial-corpus/

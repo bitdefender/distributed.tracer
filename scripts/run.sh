@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+!/usr/bin/env bash
 
 [ $# -ne 6 ] && { echo "Usage: $0 [binary-id] [runs] [cores] [benchmark-runs] [(no)rebuild] [genetic]"; exit 1; }
 read binary_id runs cores benchmark_runs rebuild  genetic<<<$@
@@ -8,6 +8,8 @@ TRACER_NODE=$DRIVER_DIR/tracer.node
 PROCESS_MANAGER=$DRIVER_DIR/process.manager
 NODE_RIVER=$TRACER_NODE/deps/node-river
 FUZZER_PATH=$TRACER_NODE/$binary_id/fuzzer
+CORPUS_PATH=$TRACER_NODE/$binary_id/corpus
+CORPUS_DIR=$TRACER_NODE/$binary_id/corpus-dir
 
 CONFIG_PATH=$(readlink -f config.json)
 
@@ -128,7 +130,7 @@ generate_testcases() {
   fi
 
   cd $PROCESS_MANAGER
-  node ./pmcli.js start basic.fuzzer $binary_id 1 -runs=$runs
+  node ./pmcli.js start basic.fuzzer $binary_id 4 -runs=$runs $CORPUS_DIR
   cd -
 
   echo -e "\033[0;32m[DRIVER] Started fuzzer to generate interesting testcases for genetic river ..."; echo -e "\033[0m"
@@ -191,6 +193,12 @@ evaluate_new_corpus() {
   cd -
 }
 
+init_corpus() {
+  if [ ! -d $CORPUS_DIR ]; then
+    unzip $CORPUS_PATH -d $CORPUS_DIR
+  fi
+}
+
 main() {
 
   [ ! -d $CORPUS_TESTER ] && { echo "Wrong $0 script call. Please chdir to distributed.tracer"; exit 1; }
@@ -205,6 +213,7 @@ main() {
 
   for i in $(seq $benchmark_runs); do
     cleanup
+    init_corpus
     start_tracer
     if [ "$genetic" == "genetic" ]; then
       start_griver
