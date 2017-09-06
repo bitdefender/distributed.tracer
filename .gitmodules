@@ -1,12 +1,6 @@
 [submodule "tracer.node"]
 	path = tracer.node
 	url = https://github.com/teodor-stoenescu/tracer.node.git
-[submodule "test.batcher"]
-	path = test.batcher
-	url = https://github.com/teodor-stoenescu/test.batcher.git
-[submodule "corpus.tester"]
-	path = corpus.tester
-	url = https://github.com/teodor-stoenescu/corpus.tester.git
 [submodule "mongo.rabbit.bridge"]
 	path = mongo.rabbit.bridge
 	url = https://github.com/teodor-stoenescu/mongo.rabbit.bridge.git
