@@ -1,4 +1,4 @@
-!/usr/bin/env bash
+#!/usr/bin/env bash
 
 [ $# -ne 6 ] && { echo "Usage: $0 [binary-id] [runs] [cores] [benchmark-runs] [(no)rebuild] [genetic]"; exit 1; }
 read binary_id runs cores benchmark_runs rebuild  genetic<<<$@
@@ -8,7 +8,7 @@ TRACER_NODE=$DRIVER_DIR/tracer.node
 PROCESS_MANAGER=$DRIVER_DIR/process.manager
 NODE_RIVER=$TRACER_NODE/deps/node-river
 STATE_AGG=$DRIVER_DIR/state.aggregator
-STATE_MANAGER=$DRIVER/state.manager
+STATE_MANAGER=$DRIVER_DIR/state.manager
 FUZZER_PATH=$TRACER_NODE/$binary_id/fuzzer
 CORPUS_PATH=$TRACER_NODE/$binary_id/corpus
 CORPUS_DIR=$TRACER_NODE/$binary_id/corpus-dir
@@ -31,13 +31,18 @@ start_tracer() {
   echo -e "\033[0;32m[DRIVER] Starting $cores processes of node RIVER ..."; echo -e "\033[0m"
   cd $PROCESS_MANAGER
   node ./pmcli.js start tracer.node $binary_id $cores
-
   cd -
 }
 
 start_state_aggregator() {
-  cd $STATE_AGG
-  node index.js -c ../config.json $binary_id
+  cd $PROCESS_MANAGER
+  node ./pmcli.js start state.aggregator $binary_id 1 $binary_id
+  cd -
+}
+
+stop_state_aggregator() {
+  cd $PROCESS_MANAGER
+  node ./pmcli.js stop state.aggregator $binary_id
   cd -
 }
 
@@ -53,7 +58,6 @@ stop_fuzzers() {
   echo -e "\033[0;32m[DRIVER] Stopping fuzzers ..."; echo -e "\033[0m"
   cd $PROCESS_MANAGER
   node ./pmcli.js stop basic.fuzzer $binary_id
-  node ./pmcli.js stop fast.fuzzer $binary_id
   node ./pmcli.js stop eval.fuzzer $binary_id
   cd -
 }
@@ -105,6 +109,10 @@ cleanup() {
   if [ -d $RESULTS_DIR ]; then
     rm -rf $RESULTS_DIR
   fi
+
+  if [ ! -d $LOGS_DIR ]; then
+    mkdir -p $LOGS_DIR
+  fi
 }
 
 sigint_handler()
@@ -138,10 +146,12 @@ generate_testcases() {
   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
   if [ ! -d "$RESULTS_DIR/results" ]; then
     mkdir -p "$RESULTS_DIR/results"
+    ## init results with initial corpus
+    cp -r $CORPUS_DIR/* $RESULTS_DIR/
   fi
 
   cd $PROCESS_MANAGER
-  node ./pmcli.js start basic.fuzzer $binary_id 4 -runs=$runs $CORPUS_DIR
+  node ./pmcli.js start basic.fuzzer $binary_id 4 -runs=$runs
   cd -
 
   echo -e "\033[0;32m[DRIVER] Started fuzzer to generate interesting testcases for genetic river ..."; echo -e "\033[0m"
@@ -214,10 +224,6 @@ main() {
 
   [ ! -d $CORPUS_TESTER ] && { echo "Wrong $0 script call. Please chdir to distributed.tracer"; exit 1; }
 
-  if [ ! -d $LOGS_DIR ]; then
-    mkdir -p $LOGS_DIR
-  fi
-
   echo
   echo "River running $benchmark_runs benchmarks on http-parser"
   echo "======================================================="
@@ -235,9 +241,11 @@ main() {
     evaluate_new_corpus
 
     ## cleanup
-    stop_tracer
     stop_fuzzers
+    stop_tracer
+    stop_state_aggregator
     stop_griver
+    mv $ID_LOGS_DIR ${ID_LOGS_DIR}_${runs}_${i}
 
   done
 }
