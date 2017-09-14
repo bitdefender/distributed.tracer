@@ -47,7 +47,7 @@ start_tracer() {
 
 start_state_aggregator() {
   cd $PROCESS_MANAGER
-  node ./pmcli.js start state.aggregator $binary_id 1 $binary_id
+  node ./pmcli.js start state.aggregator $binary_id 1
   cd -
 }
 
