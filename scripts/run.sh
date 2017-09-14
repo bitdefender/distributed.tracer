@@ -32,6 +32,17 @@ start_tracer() {
   cd $PROCESS_MANAGER
   node ./pmcli.js start tracer.node $binary_id $cores
   cd -
+
+  # wait until data is downloaded
+  while [ ! -f $CORPUS_PATH ]; do
+    sleep 1
+  done
+
+  # unpack corpus
+  echo -e "\033[0;32m[DRIVER] Unpacking corpus ..."; echo -e "\033[0m"
+  if [ ! -d $CORPUS_DIR ]; then
+    unzip $CORPUS_PATH -d $CORPUS_DIR
+  fi
 }
 
 start_state_aggregator() {
@@ -214,12 +225,6 @@ evaluate_new_corpus() {
   cd -
 }
 
-init_corpus() {
-  if [ ! -d $CORPUS_DIR ]; then
-    unzip $CORPUS_PATH -d $CORPUS_DIR
-  fi
-}
-
 main() {
 
   [ ! -d $CORPUS_TESTER ] && { echo "Wrong $0 script call. Please chdir to distributed.tracer"; exit 1; }
@@ -230,7 +235,6 @@ main() {
 
   for i in $(seq $benchmark_runs); do
     cleanup
-    init_corpus
     start_state_aggregator
     start_tracer
     if [ "$genetic" == "genetic" ]; then
