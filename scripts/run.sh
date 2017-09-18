@@ -25,6 +25,7 @@ RESULTS_DIR=$ID_LOGS_DIR/results
 MONGO_URL="mongodb://worker:workwork@10.18.0.32:27017/test?authSource=admin"
 
 NO_TESTCASES=0
+MAX_TRIES=10
 
 start_tracer() {
   # start the desired number of node river running processes
@@ -34,15 +35,17 @@ start_tracer() {
   cd -
 
   # wait until data is downloaded
-  while [ ! -f $CORPUS_PATH ]; do
+  for k in $(seq 0 $MAX_TRIES); do
+    if [ -f $CORPUS_PATH ]; then
+      # unpack corpus
+      echo -e "\033[0;32m[DRIVER] Unpacking corpus ..."; echo -e "\033[0m"
+      if [ ! -d $CORPUS_DIR ]; then
+        unzip $CORPUS_PATH -d $CORPUS_DIR
+        break
+      fi
+    fi
     sleep 1
   done
-
-  # unpack corpus
-  echo -e "\033[0;32m[DRIVER] Unpacking corpus ..."; echo -e "\033[0m"
-  if [ ! -d $CORPUS_DIR ]; then
-    unzip $CORPUS_PATH -d $CORPUS_DIR
-  fi
 }
 
 start_state_aggregator() {

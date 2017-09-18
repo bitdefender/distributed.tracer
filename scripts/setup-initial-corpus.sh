@@ -42,7 +42,9 @@ while true; do
   name=$(sed -e 's/^"//' -e 's/"$//' <<<"$name")
 
   if [ "$name" != "http-parser" ]; then
-    continue
+    if [ "$name" != "libjsmn" ]; then
+      continue
+    fi
   fi
 
   ## generate corpus
