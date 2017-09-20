@@ -165,7 +165,7 @@ generate_testcases() {
   fi
 
   cd $PROCESS_MANAGER
-  node ./pmcli.js start basic.fuzzer $binary_id 4 -runs=$runs
+  node ./pmcli.js start basic.fuzzer $binary_id $cores -runs=$runs
   cd -
 
   echo -e "\033[0;32m[DRIVER] Started fuzzer to generate interesting testcases for genetic river ..."; echo -e "\033[0m"
