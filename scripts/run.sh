@@ -21,6 +21,7 @@ GRIDFS_NAME="trace_$binary_id"
 ID_LOGS_DIR=$(pwd)/$binary_id
 LOGS_DIR=$ID_LOGS_DIR/logs
 RESULTS_DIR=$ID_LOGS_DIR/results
+CRASH_DIR=$ID_LOGS_DIR/crashes
 
 MONGO_URL="mongodb://worker:workwork@10.18.0.32:27017/test?authSource=admin"
 
@@ -126,6 +127,10 @@ cleanup() {
 
   if [ ! -d $LOGS_DIR ]; then
     mkdir -p $LOGS_DIR
+  fi
+
+  if [ ! -d $CRASH_DIR ]; then
+    mkdir -p $CRASH_DIR
   fi
 }
 
