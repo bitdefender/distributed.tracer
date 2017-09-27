@@ -125,6 +125,10 @@ cleanup() {
     rm -rf $RESULTS_DIR
   fi
 
+  if [ -d $CORPUS_DIR ]; then
+    rm -rf $CORPUS_DIR
+  fi
+
   if [ ! -d $LOGS_DIR ]; then
     mkdir -p $LOGS_DIR
   fi
