@@ -41,12 +41,6 @@ while true; do
   name=$(echo $item | jq '.name')
   name=$(sed -e 's/^"//' -e 's/"$//' <<<"$name")
 
-  if [ "$name" != "http-parser" ]; then
-    if [ "$name" != "libjsmn" ]; then
-      continue
-    fi
-  fi
-
   ## generate corpus
 . $SCRIPTS_PATH/build-$name.sh
 
