@@ -66,8 +66,7 @@ def generate_graph(baseline, cardinal):
         for r in cardinal[b]:
             l = cardinal[b][r]
             cardinal[b][r] = reduce(lambda x, y: x + y, l) / len(l)
-
-    df = pandas.DataFrame.from_dict(cardinal)
+    df = pandas.DataFrame.from_dict(cardinal, orient='index').sort_index()
     df.plot(kind='barh', ylim=(100000, 10000000), xlim=(0, 3000))
     plt.show()
 
