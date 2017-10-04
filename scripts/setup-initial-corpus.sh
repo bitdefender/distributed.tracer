@@ -41,6 +41,11 @@ while true; do
   name=$(echo $item | jq '.name')
   name=$(sed -e 's/^"//' -e 's/"$//' <<<"$name")
 
+  ## skip freetype
+  if [ "$name" == "freetype" ]; then
+    continue
+  fi
+
   ## generate corpus
 . $SCRIPTS_PATH/build-$name.sh
 
