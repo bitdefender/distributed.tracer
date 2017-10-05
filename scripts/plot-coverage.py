@@ -1,6 +1,7 @@
 import re
 import os
 import csv
+import sys
 import json
 import requests
 from functools import reduce
@@ -14,6 +15,9 @@ BENCHMARKING_DIR_RE=re.compile(r'([0-9a-f]{24})_(\d+)_(\d+)')
 
 def get_current_directory():
     return os.path.dirname(os.path.realpath(__file__))
+
+benchmarking_dir = os.path.dirname(os.path.dirname(get_current_directory())) + "/benchmarks"
+baseline_dir = os.path.dirname(os.path.dirname(get_current_directory())) + "/baseline-benchmarks"
 
 def read_csv(path):
     res = {}
@@ -47,7 +51,6 @@ def get_context():
 
     ## iterate through benchmarking dir
     ## to get the results
-    benchmarking_dir = os.path.dirname(get_current_directory())
     print("Searching for benchmarking dirs in: %s" % benchmarking_dir)
 
     results = BENCHMARKING_DIR_RE.findall(' '.join(os.listdir(
@@ -60,20 +63,57 @@ def get_context():
 
     return benchmarks
 
+def to_average(data):
+    for b in data:
+        for r in data[b]:
+            l = data[b][r]
+            data[b][r] = reduce(lambda x, y: x + y, l) / len(l)
+    return data
+
+def normalize(baseline, cardinal):
+    pass
+    for k in cardinal:
+        for run in list(cardinal[k]):
+            if run in baseline[k]:
+                cardinal[k][run] = cardinal[k][run] / baseline[k][run]
+            else:
+                cardinal[k].pop(run, None)
+
+    return cardinal
+
 def generate_graph(baseline, cardinal):
-    ## compute average for each benchmark
-    for b in cardinal:
-        for r in cardinal[b]:
-            l = cardinal[b][r]
-            cardinal[b][r] = reduce(lambda x, y: x + y, l) / len(l)
-    df = pandas.DataFrame.from_dict(cardinal, orient='index').sort_index()
-    df.plot(kind='barh', ylim=(100000, 10000000), xlim=(0, 3000))
+    cardinal = to_average(cardinal)
+    baseline = to_average(baseline)
+
+    data = normalize(baseline, cardinal)
+
+    df = pandas.DataFrame.from_dict(data, orient='index').sort_index()
+    df.plot(kind='barh')
     plt.show()
+
+def get_baseline_results(names):
+    baseline_results = {}
+    for n in names:
+        baseline_results[n] = {}
+        dir = baseline_dir
+        csvs = [f for f in os.listdir(dir) if
+                (re.match(r'.*-\d+-\d+.csv', f) and f.startswith(n))]
+        for c in csvs:
+            res = read_csv(dir + '/' + c)
+            for k in res:
+                if not k in baseline_results[n]:
+                    baseline_results[n][k] = []
+                baseline_results[n][k] += res[k]
+    return baseline_results
+
+
 
 def main():
     benchmarks = get_context()
 
-    benchmarking_dir = os.path.dirname(get_current_directory())
+    ## get baseline results
+    baseline_results = get_baseline_results([benchmarks[k]['name'] for k in benchmarks])
+
     cardinal_results = {}
     for id in benchmarks:
         name = benchmarks[id]['name']
@@ -94,7 +134,7 @@ def main():
                         cardinal_results[name][k] = []
                     cardinal_results[name][k] += res[k]
 
-    generate_graph(None, cardinal_results)
+    generate_graph(baseline_results, cardinal_results)
 
 
     ## for Cardinal, data is stored in dir/logs/eval-*
