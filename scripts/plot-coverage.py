@@ -3,8 +3,10 @@ import os
 import csv
 import sys
 import json
+import operator
 import requests
 from functools import reduce
+from collections import OrderedDict
 
 ## plot
 import pandas
@@ -24,9 +26,10 @@ def read_csv(path):
     with open(path, 'r') as csv_file:
         r = csv.reader(csv_file, delimiter='\t')
         for row in r:
-            if not row[0] in res:
-                res[row[0]] = []
-            res[row[0]].append(int(row[2]))
+            runs = int(row[0])
+            if not runs in res:
+                res[runs] = []
+            res[runs].append(int(row[2]))
 
     return res
 
@@ -81,14 +84,23 @@ def normalize(baseline, cardinal):
 
     return cardinal
 
+def sort_dict(d):
+    return OrderedDict(sorted(d.items()))
+
 def generate_graph(baseline, cardinal):
     cardinal = to_average(cardinal)
     baseline = to_average(baseline)
 
     data = normalize(baseline, cardinal)
 
+    for k in data:
+        data[k] = sort_dict(data[k])
+
     df = pandas.DataFrame.from_dict(data, orient='index').sort_index()
-    df.plot(kind='barh')
+    df = df.reindex_axis(sorted(df.columns), axis=1)
+    df.plot(kind='barh', color=['green', 'red', 'magenta', 'cyan', 'yellow',
+        'black', 'gray', 'pink', 'blue', 'crimson', 'violet', 'lightgreen'])
+    plt.axvline(x=1.0)
     plt.show()
 
 def get_baseline_results(names):
