@@ -1,0 +1,7 @@
+{
+    "tracer.node" : 16,
+    "state.aggregator" : 4,
+    "basic.fuzzer" : 4,
+    "eval.fuzzer" : 4,
+    "griver"    : 4
+}

@@ -7,9 +7,6 @@
 [submodule "river.genetic"]
 	path = river.genetic
 	url = https://github.com/marius92mc/river-log-file-analysis.git
-[submodule "process.manager"]
-	path = process.manager
-	url = https://github.com/teodor-stoenescu/process.manager.git
 [submodule "state.manager"]
 	path = state.manager
 	url = https://github.com/teodor-stoenescu/state.manager.git
