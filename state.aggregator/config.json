@@ -1,0 +1,33 @@
+{
+	"rabbit" : {
+		"host" : "10.18.0.32",
+		"port" : 5672,
+		"user" : "worker",
+		"password" : "workwork",
+		"flow" : {
+			"prefix" : "driver",
+			"new" : "new",
+			"batched" : "batched"
+		}
+	},
+
+	"mongo" : {
+		"host" : "10.18.0.32",
+		"port" : 27017,
+		"user" : "worker",
+		"password" : "workwork",
+		"database" : "test",
+		"prefix" : "tests_",
+		"testsPrefix" : "tests_",
+		"tocPrefix" : "toc_",
+		"stateGlobalPrefix" : "state_g_",
+		"stateLocalPrefix" : "state_l_",
+		"authdb" : "admin"
+	},
+
+
+	"interface" : {
+		"secret" : "forwhomthebelltolls",
+		"httpport" : 8090
+	}
+}
