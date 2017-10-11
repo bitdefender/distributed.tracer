@@ -7,6 +7,3 @@
 [submodule "river.genetic"]
 	path = river.genetic
 	url = https://github.com/marius92mc/river-log-file-analysis.git
-[submodule "river.clang.ginfer"]
-	path = river.clang.ginfer
-	url = https://github.com/teodor-stoenescu/river.clang.ginfer.git
