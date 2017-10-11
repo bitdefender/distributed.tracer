@@ -1,0 +1,28 @@
+# sudo cp river.genetic.service /lib/systemd/system
+# must have python3 parse module installed locally
+
+[Unit]
+Description=Driver component that generates new testcases based on driver database traces
+
+[Service]
+# modify the absolute paths accordingly
+Environment="SPARK_HOME=/data/spark/spark-2.0.1-bin-hadoop2.7"
+Environment="PYSPARK_PYTHON=/usr/bin/python3"
+Environment="PYSPARK_DRIVER_PYTHON=/usr/bin/python3"
+Environment="PYTHONPATH=/data/spark/spark-2.0.1-bin-hadoop2.7/python:/data/spark/spark-2.0.1-bin-hadoop2.7/python/lib/py4j-0.10.3-src.zip"
+Environment="JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64"
+Environment="SPARK_WORKER_DIR=/data/spark_worker_dir"
+Environment="SPARK_EXECUTOR_INSTANCES=2"
+Environment="SCALA_HOME=/usr/share/scala/lib"
+Environment="SPARK_LOCAL_IP=10.18.0.32"
+
+Environment="PYTHONUNBUFFERED=1"
+Environment="SIMPLETRACERLOGSPATH=/data/distributed.tracer/river.genetic/genetic_code/logs"
+Environment="LD_LIBRARY_PATH=/data/simpletracer/build-river-tools/lib:/data/simpletracer/river.sdk/lin/lib"
+Environment="SIMPLETRACERPATH=/data/simpletracer/build-river-tools/bin/simple_tracer"
+ExecStart=/usr/bin/python3 /data/distributed.tracer/river.genetic/genetic_code/main.py --testsFolderCount 10 --numTasks 1 --isParallelExecution 0 --populationSize 10 --numberOfIterations 10 --config /data/distributed.tracer/config.json --driver 1  --isDebugEnabled 1 --executableId 58f8d950bc0fe75e43e708fc
+
+LimitFSIZE=infinity
+LimitCPU=infinity
+# virtual memory
+LimitAS=infinity
