@@ -1,0 +1,25 @@
+.heading-only {
+    border-bottom: 0px;
+}
+
+.well-title {
+    margin-top: 0px;
+    margin-bottom: 0px;
+    font-size: 10px;
+    text-transform: uppercase;
+    text-align: right;
+}
+
+.well-value {
+    text-align: right;
+    font-size: 48px;
+}
+
+.well-value-small {
+    text-align: right;
+    font-size: 36px;
+}
+
+.btn-tiny {
+    padding: 0px 5px;
+}

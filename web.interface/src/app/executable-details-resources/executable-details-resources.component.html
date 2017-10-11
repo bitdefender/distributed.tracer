@@ -1,0 +1,29 @@
+<button (click)="runTest()" class="btn btn-warning">Run</button>
+<div class="list-group">
+  <div *ngFor="let process of modelKeys" class="list-group-item">
+    <div class="media-body">
+      <h4 class="list-group-item-heading">{{process}}</h4>
+      <p class="list-group-item-text">Main test tracer</p>
+    </div>
+    <div class="media-right media-middle">
+      <div class="input-group">
+        <!--<input type="number" [disabled]="!editable" class="form-control number-control" aria-describedby="basic-addon2" [value]="model[process].running.length" min="0" [max]="model[process].max">
+        <span class="input-group-addon" id="basic-addon2">
+          <span >/{{model[process].max}}</span>
+        </span>-->
+        <input type="range" [disabled]="!editable" class="form-control range-control" [value]="values[process]" (input)="values[process] = $event.target.value" min="0" [max]="model[process].max">
+        <span class="input-group-addon" id="basic-addon2">
+          <span class="max-count">{{values[process]}}/{{model[process].max}}</span>
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="!editable" class="form-group">
+  <button [disabled]="loading" (click)="setEditable()" class="btn btn-warning">Modify</button>
+</div>
+<div *ngIf="editable" class="form-group">
+  <button [disabled]="loading" (click)="applyEditable()" class="btn btn-danger">Apply</button>
+  <a class="btn btn-link" (click)="cancelEditable()">Cancel</a>
+</div>

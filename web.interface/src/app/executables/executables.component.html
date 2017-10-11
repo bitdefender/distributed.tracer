@@ -1,0 +1,42 @@
+<div class="col-md-8 offset-md-2">
+  <div>
+    <h2 class="title is-4">Executables
+      <span class="btn-group btn-group-sm float-sm-right" style="margin-top:5px">
+        <button [routerLink]="['/addexecutable']" data-toggle="tooltip" data-placement="top" title="Add executable" class="btn btn-secondary"><i class="fa fa-plus" aria-hidden="true"></i></button>
+        <button (click)="loadData()" data-toggle="tooltip" data-placement="top" title="Refresh" class="btn btn-secondary"><i class="fa fa-refresh" aria-hidden="true"></i></button>
+      </span>
+    </h2>
+  </div>
+  <div class="columns">
+    <div class="column is-one-third">
+      <input type="text" class="form-control" placeholder="Search executables" [(ngModel)]="filter">
+    </div>
+  </div>
+
+  <!-- here is the actual pagination code -->
+  <div class="has-text-centered">
+    <pagination-controls id="advanced"
+                        maxSize="7"
+                        directionLinks="true"
+                        autoHide="false"
+                        previousLabel="Previous"
+                        nextLabel="Next"
+                        screenReaderPaginationLabel="Pagination"
+                        screenReaderPageLabel="page"
+                        screenReaderCurrentLabel="You\'re on page"
+                        (pageChange)="onPageChange($event)"></pagination-controls>
+  </div>
+  
+  <div class="list-group">
+    <a *ngFor="let exe of model | filterExecutable:filter | paginate: config" [routerLink]="['/executables', exe.id]" class="list-group-item list-group-item-action">
+      <div class="d-flex mr-3">
+        <img *ngIf="exe.platform=='Windows'" class="media-object" src="/assets/images/os_win.png" />
+        <img *ngIf="exe.platform=='Linux'" class="media-object" src="/assets/images/os_lin.png" />
+      </div>
+      <div class="media-body">
+        <h4 class="list-group-item-heading no-margin">{{exe.name}}</h4>
+        <p class="list-group-item-text no-margin">{{exe.execution}}</p>
+      </div>
+    </a>
+  </div>
+</div>

@@ -1,0 +1,61 @@
+<div class="row">
+  <div class="col-md-6">
+    <div class="panel alert alert-info">
+      <div class="panel-heading heading-only">
+        <div class="well-title">Corpus size</div>
+        <div class="well-value">{{model.corpus}}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="panel alert alert-success">
+      <div class="panel-heading heading-only">
+        <div class="well-title">Traced tests</div>
+        <div class="well-value">{{model.traced}}</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-4">
+    <div class="panel alert alert-success">
+      <div class="panel-heading heading-only">
+        <div class="well-title">Passed</div>
+        <div class="well-value-small">{{model.passed}}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="panel alert alert-warning">
+      <div class="panel-heading heading-only">
+        <div class="well-title">Crashes</div>
+        <div class="well-value-small">{{model.failed}}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="panel alert alert-danger">
+      <div class="panel-heading heading-only">
+        <div class="well-title">River crashes</div>
+        <div class="well-value-small">{{model.errored}}</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="btn-group btn-group-sm" style="float:right" role="group" aria-label="Refresh" [(ngModel)]="config.refresh" ngbRadioGroup name="refresh" (click)="refresh($event)">
+  <label class="btn btn-secondary btn-tiny">
+    <input type="radio" value="2">2s
+  </label>
+  <label class="btn btn-secondary btn-tiny">
+    <input type="radio" value="5">5s
+  </label>
+  <label class="btn btn-secondary btn-tiny">
+    <input type="radio" value="10">10s
+  </label>
+  <label class="btn btn-secondary btn-tiny">
+    <input type="radio" value="30">30s
+  </label>
+  <label class="btn btn-secondary btn-tiny">
+    <input type="radio" value="0">Off
+  </label>
+</div>

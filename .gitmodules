@@ -1,6 +1,3 @@
 [submodule "tracer.node"]
 	path = tracer.node
 	url = https://github.com/teodor-stoenescu/tracer.node.git
-[submodule "web.interface"]
-	path = web.interface
-	url = https://github.com/teodor-stoenescu/web.interface.git

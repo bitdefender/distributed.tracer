@@ -1,0 +1,55 @@
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Executable info</h3>
+  </div>
+  <ul class="list-group">
+    <li class="list-group-item"> <strong>ID:</strong>&nbsp;{{model?.id}}
+      <span class="btn-group btn-group-sm ml-sm-auto">
+        <button ngxClipboard cbContent="{{model?.id}}" data-toggle="tooltip" data-placement="top" title="Copy to clipboard" class="btn btn-secondary"><i class="fa fa-files-o" aria-hidden="true"></i></button>
+      </span>
+    </li>
+    <li class="list-group-item">
+      <strong>Size:</strong>&nbsp;{{model?.size | fileSize}}</li>
+    <li class="list-group-item">
+      <strong>SHA-256:</strong>&nbsp;{{model?.sha256}}
+      <span class="btn-group btn-group-sm ml-sm-auto">
+        <button ngxClipboard cbContent="{{model?.sha256}}" data-toggle="tooltip" data-placement="top" title="Copy to clipboard" class="btn btn-secondary"><i class="fa fa-files-o" aria-hidden="true"></i></button>
+      </span>
+    </li>
+  </ul>
+</div>
+
+<div *ngIf="model?.features.mempatch" class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Memory patch</h3>
+  </div>
+  <div class="panel-body">
+    <pre><code>{{model?.mempatch}}</code></pre>
+  </div>
+</div>
+
+<div *ngIf="model?.features.corpus" class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Initial corpus info</h3>
+  </div>
+  <ul class="list-group">
+    <li class="list-group-item"> <strong>Inputs:</strong>&nbsp;{{model?.corpus.inputs}}</li>
+    <li class="list-group-item">
+      <strong>Size:</strong>&nbsp;{{model?.corpus.size | fileSize}}</li>
+    <li class="list-group-item">
+      <strong>Checksum:</strong>&nbsp;{{model?.corpus.checksum}}</li>
+  </ul>
+</div>
+
+
+<div *ngIf="model?.features.fuzzer" class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Fuzzer info</h3>
+  </div>
+  <ul class="list-group">
+    <li class="list-group-item">
+      <strong>Size:</strong>&nbsp;{{model?.fuzzer.size | fileSize}}</li>
+    <li class="list-group-item"> <strong>Checksum:</strong>&nbsp;{{model?.fuzzer.checksum}}</li>
+  </ul>
+</div>
+

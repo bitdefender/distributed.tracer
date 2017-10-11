@@ -1,0 +1,14 @@
+<li *ngIf="!logged"  class="nav-item">
+  <a class="nav-link" [routerLink]="['/login']">Log in</a>
+</li>
+<li *ngIf="logged" ngbDropdown class="nav-item dropdown">
+  <a id="dropdownMenu1" ngbDropdownToggle data-toggle="dropdown" class="nav-link dropdown-toggle" aria-haspopup="true" aria-expanded="false">
+    {{userName}}
+  </a>
+  <div aria-labelledby="dropdownMenu1" class="dropdown-menu dropdown-menu-right">
+    <a [routerLink]="['/settings']" class="dropdown-item">User settings</a>
+    <a [routerLink]="['/tokens']" class="dropdown-item">Token manager</a>
+    <a [routerLink]="['/logout']" class="dropdown-item">Logout</a>
+  </div>
+</li>
+

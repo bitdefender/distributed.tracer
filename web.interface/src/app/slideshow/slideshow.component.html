@@ -1,0 +1,153 @@
+<section class="pnl home" data-section-name="home" (window:keydown)="KeyPressed($event)">
+    <div class="inner-first">
+        <div class="vertical-center">
+            <h1>Welcome</h1>
+            <p>Cardinal is a <a href="#collaborative" (click)="navigate('collaborative')">collaborative</a>, <a href="#scalable" (click)="navigate('scalable')">scalable</a>, <a href="#deep" (click)="navigate('deep')">deep program inspection</a> framework based on the River intermediate language.</p>
+        </div>
+        <div class="vertical-bottom">
+            <p>Keep scrolling for additional framework details.</p>
+            <a href="#deep" (click)="navigate('deep')">
+                <p>
+                <img src="/assets/images/arrow.png" />
+                </p>
+            </a>
+        </div>
+    </div>
+</section>
+<section class="pnl panel1" data-section-name="deep">
+    <div class="inner">
+        <div class="vertical-left">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <h2>Deep program inspection</h2>
+                    </div>
+                </div>
+                <div class="row vert-align">
+                    <div class="col-sm-8">
+                        <p>Cardinal combines features of fuzzers and symbolic execution in order to generate a test corpus, with the goal of maximizing code coverage.</p>
+                        <p>The framework accepts x86 Windows (PE) and Linux (ELF32) binaries, and optionally, a static test corpus or a test generator.</p>
+                    </div>
+                    <div class="col-sm-4">
+                        <img src="/assets/images/deep.png" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="pnl panel2" data-section-name="scalable">
+    <div class="inner">
+        <div class="vertical-left">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <h2>Scalable</h2>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-4">
+                        <img src="/assets/images/scaling.png" />
+                    </div>
+                    <div class="col-sm-8">
+                        <p>Cardinal is composed on several loosely coupled components that can be instanced as many times as necessary to cover available computing resources.</p>
+                        <template #pGenContent>
+                            <div class="text-center"><i class="fa fa-ellipsis-h" aria-hidden="true"></i></div>
+                            insert new tests in the Cardinal pipeline. Optionally, generators may query the global state in order to generate higher quality testcases.
+                        </template>
+                        <p>
+                            <i class="fa fa-cog fa-spin"></i>&nbsp;Test generators&nbsp;
+                            <i 
+                                [ngbPopover]="pGenContent" 
+                                placement="right"
+                                container="body"
+                                triggers="hover"
+                                #pGen="ngbPopover"
+                                class="fa fa-question-circle"
+                            ></i>
+                        </p>
+
+                        <template #pWrkContent>
+                            <div class="text-center"><i class="fa fa-ellipsis-h" aria-hidden="true"></i></div>
+                            are the workhorse of the Cardinal framework, and are responsible for generating execution traces, input taint analyses and symbolic executions.
+                        </template>
+                        <p>
+                            <i class="fa fa-cog fa-spin"></i>&nbsp;River workers&nbsp;
+                            <i 
+                                [ngbPopover]="pWrkContent"
+                                placement="right"
+                                container="body"
+                                triggers="hover"
+                                #pWrk="ngbPopover"
+                                class="fa fa-question-circle"
+                            ></i>
+                        </p>
+
+                        <template #pGloContent>
+                            <div class="text-center"><i class="fa fa-ellipsis-h" aria-hidden="true"></i></div>
+                            maintain the testing state, including coverage counters, generator-specific persistent information and symbolic expressions.
+                        </template>
+                        <p>
+                            <i class="fa fa-cog fa-spin"></i>&nbsp;Global state aggregators&nbsp;
+                            <i 
+                                [ngbPopover]="pGloContent" 
+                                placement="right"
+                                container="body"
+                                triggers="hover"
+                                #pGlo="ngbPopover"
+                                class="fa fa-question-circle"
+                            ></i>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="pnl panel3" data-section-name="collaborative">
+    <div class="inner">
+        <div class="vertical-left">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <h2>Collaborative</h2>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-8">
+                        <p>Cardinal uses multiple testcase sources</p>
+                        <ul class="fa-ul">
+                        <li><i class="fa-li fa fa-check"></i>The provided corpus</li>
+                        <li><i class="fa-li fa fa-check"></i>The provided generator</li>
+                        <li><i class="fa-li fa fa-check"></i>Orthrus, for generating an initial testcase corpus</li>
+                        <li><i class="fa-li fa fa-check"></i>A testcase generator based on genetic algorithms</li>
+                        <li><i class="fa-li fa fa-check"></i>Heuristic testcase generators based on the AFLfast fuzzer</li>
+                        <li><i class="fa-li fa fa-check"></i>The River symbolic execution framework</li>
+                        </ul>
+                    </div>
+                    <div class="col-sm-4">
+                        <img src="/assets/images/collaborative.png" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="pnl panel4" data-section-name="about">
+    <div class="inner-last">
+        <div class="vertical-center">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <p><img src="/assets/images/slack.png" /></p>
+                        <p>For additional details and access request contact</p>
+                        <p>
+                        <a class="slack-link" href="https://bitdefender.slack.com/messages/@tstoenescu/" target="_blank">@tstoenescu</a> 
+                        or 
+                        <a class="slack-link" href="https://bitdefender.slack.com/messages/@asandulescu/" target="_blank">@asandulescu</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

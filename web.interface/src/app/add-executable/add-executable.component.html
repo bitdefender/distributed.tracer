@@ -1,0 +1,90 @@
+<div class="col-md-8 offset-md-2">
+    <h2>Add executable</h2>
+    <form name="form" (ngSubmit)="f.form.valid && register()" #f="ngForm" novalidate>
+        <div class="form-group" [ngClass]="{ 'has-error': f.submitted && !executableName.valid }">
+            <label for="executableName">Executable Name</label>
+            <input type="text" class="form-control" name="executableName" [(ngModel)]="model.executableName" #executableName="ngModel" required />
+            <div *ngIf="f.submitted && !executableName.valid" class="help-block">Executable name is required</div>
+        </div>
+        <div class="form-group">
+            <label>Configuration</label><br />
+            <div [(ngModel)]="model.platform" ngbRadioGroup name="platform">
+                <label class="btn btn-secondary">
+                    <input type="radio" value="Windows"> Windows
+                </label>
+                <label class="btn btn-secondary">
+                    <input type="radio" value="Linux"> Linux
+                </label>
+            </div>
+            <div [(ngModel)]="model.execution" ngbRadioGroup name="execution">
+                <label class="btn btn-secondary">
+                    <input type="radio" value="Inprocess"> Inprocess
+                </label>
+                <label class="btn btn-secondary">
+                    <input type="radio" value="Extern"> Extern
+                </label>
+            </div>
+            <div class="btn-group" data-toggle="buttons">
+                <label class="btn btn-secondary" [class.active]="model.hasMempatch">
+                    <input type="checkbox" [(ngModel)]="model.hasMempatch" name="hasMempatch"> Memory patch
+                </label>
+                <label class="btn btn-secondary" [class.active]="model.hasCorpus">
+                    <input type="checkbox" [(ngModel)]="model.hasCorpus" name="hasCorpus"> Corpus
+                </label>
+                <label class="btn btn-secondary" [class.active]="model.hasFuzzer">
+                    <input type="checkbox" [(ngModel)]="model.hasFuzzer" name="hasFuzzer"> Fuzzer
+                </label>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="binary">Executable</label>
+            <div class="input-group">
+              <span class="input-group-btn">
+                <label class="btn btn-secondary label-file">
+                    Browse <input type="file" name="binary" (change)="binary.file=$event.target.files[0];binary.name=$event.target.files[0].name" required style="display:none;"/>
+                </label>
+              </span>
+              <input type="text" class="form-control" [value]="binary.name" placeholder="Select binary..." readonly>
+            </div>
+            <!--<div *ngIf="f.submitted" class="help-block">Binary is required</div>-->
+        </div>
+        <div *ngIf="model.hasMempatch" class="form-group">
+            <label for="mempatch">Memory patch file</label>
+            <div class="input-group">
+              <span class="input-group-btn">
+                <label class="btn btn-secondary label-file">
+                    Browse <input type="file" name="mempatch" (change)="mempatch.file=$event.target.files[0];mempatch.name=$event.target.files[0].name" style="display:none;"/>
+                </label>
+              </span>
+              <input type="text" class="form-control" [value]="mempatch.name" placeholder="Select memory patch file..." readonly>
+            </div>
+        </div>
+        <div *ngIf="model.hasCorpus" class="form-group">
+            <label for="corpus">Corpus archive</label>
+            <div class="input-group">
+              <span class="input-group-btn">
+                <label class="btn btn-secondary label-file">
+                    Browse <input type="file" name="corpus" (change)="corpus.file=$event.target.files[0];corpus.name=$event.target.files[0].name" style="display:none;"/>
+                </label>
+              </span>
+              <input type="text" class="form-control" [value]="corpus.name" placeholder="Select corpus archive..." readonly>
+            </div>
+        </div>
+        <div *ngIf="model.hasFuzzer" class="form-group">
+            <label for="fuzzer">Fuzzer binary</label>
+            <div class="input-group">
+              <span class="input-group-btn">
+                <label class="btn btn-secondary label-file">
+                    Browse <input type="file" name="fuzzer" (change)="fuzzer.file=$event.target.files[0];fuzzer.name=$event.target.files[0].name" required style="display:none;"/>
+                </label>
+              </span>
+              <input type="text" class="form-control" [value]="fuzzer.name" placeholder="Select fuzzer..." readonly>
+            </div>
+        </div>
+        <div class="form-group">
+            <button [disabled]="loading" class="btn btn-primary">Upload</button>
+            <img *ngIf="loading" src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA==" />
+            <a [routerLink]="['/executables']" class="btn btn-link">Cancel</a>
+        </div>
+    </form>
+</div>

@@ -1,0 +1,18 @@
+.info-title {
+    margin-top: 0px;
+    margin-bottom: 0px;
+    font-size: 10px;
+    color: #555;
+    text-transform: uppercase;
+    text-align: right;
+    float: right;
+}
+
+.test-text {
+    background-color:#FFF;
+    border:0px;
+    padding:0px;
+    white-space:pre-wrap;
+    margin-bottom:0px;
+    word-wrap: break-word;
+}

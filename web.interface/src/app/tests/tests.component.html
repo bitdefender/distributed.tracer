@@ -1,0 +1,53 @@
+<div class="col-md-8 offset-md-2">
+  <div>
+    <h2 class="title is-4">Test <small>{{model?._id}}</small></h2>
+      <!--<span class="btn-group float-sm-right" style="margin-top:5px">
+        <span [routerLink]="['/addexecutable']" data-toggle="tooltip" data-placement="top" title="Add executable" class="btn btn-secondary btn-xs glyphicon glyphicon-plus"></span>
+        <span (click)="loadData()" data-toggle="tooltip" data-placement="top" title="Refresh" class="btn btn-secondary btn-xs glyphicon glyphicon-refresh"></span>
+      </span>-->
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">Test info</h3>
+    </div>
+    <ul class="list-group">
+      <li class="list-group-item"> <strong>ID:</strong>&nbsp;{{model?._id}}
+        <span class="btn-group btn-group-sm ml-sm-auto">
+          <button ngxClipboard cbContent="{{model?.id}}" data-toggle="tooltip" data-placement="top" title="Copy to clipboard" class="btn btn-secondary"><i class="fa fa-files-o" aria-hidden="true"></i></button>
+        </span>
+      </li>
+      <li class="list-group-item"> <strong>State:</strong>&nbsp;{{model?.state}} </li>
+      <li *ngIf="model?.result" class="list-group-item"> <strong>Status:</strong>&nbsp;{{model?.result}} </li>
+    </ul>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">Input</h3>
+    </div>
+    <ul class="list-group">
+      <li class="list-group-item" style="word-wrap:break-word" >
+        <div class="d-block w-100">
+          <p class="info-title float-sm-right">Base64</p> 
+          {{model?.data}}
+        </div>
+      </li>
+      <li class="list-group-item">
+        <div class="d-block w-100">
+          <p class="info-title float-sm-right">Binary</p> 
+          <pre class="test-text">{{model?.data | binary}}</pre>
+        </div>
+      </li>
+      <li class="list-group-item">
+        <div class="d-block w-100">
+          <p class="info-title float-sm-right">Text</p> 
+          <pre class="test-text">{{model?.data | text}}</pre>
+        </div>
+      </li>
+    </ul>
+  </div>
+  
+</div>
+
+<!-- https://localhost/tests/590b0d390342451e7ab81244/bb589d0621e5472f470fa3425a234c74b1e202e8 -->

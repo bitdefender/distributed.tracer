@@ -1,0 +1,74 @@
+<template #content ngbModalContainer let-o="close" let-c="close" let-d="dismiss">
+  <div class="modal-header">
+    <h3 class="modal-title w-100">Create token
+      <span class="btn-group btn-group-sm float-sm-right" style="margin-top:5px">
+        <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+          <i class="fa fa-times" aria-hidden="true"></i>
+        </button>
+      </span>
+    </h3>
+  </div>
+  <div class="modal-body">
+    <input type="text" class="form-control" [(ngModel)]="newtoken.name" placeholder="Token name"> <br />
+    <div class="btn-group" data-toggle="buttons">
+      <label *ngIf="availablePermissions.execRead" class="btn btn-secondary" [class.active]="newtoken.permissions.execRead">
+        <input type="checkbox" name="permissions" [(ngModel)]="newtoken.permissions.execRead"> Executables read
+      </label>
+      <label *ngIf="availablePermissions.execWrite" class="btn btn-secondary" [class.active]="newtoken.permissions.execWrite">
+        <input type="checkbox" name="permissions" [(ngModel)]="newtoken.permissions.execWrite"> Executables write
+      </label>
+      <label  *ngIf="availablePermissions.tokens" class="btn btn-secondary" [class.active]="newtoken.permissions.tokens">
+        <input type="checkbox" name="permissions" [(ngModel)]="newtoken.permissions.tokens"> Tokens
+      </label>
+      <label  *ngIf="availablePermissions.users" class="btn btn-secondary" [class.active]="newtoken.permissions.users">
+        <input type="checkbox" name="permissions" [(ngModel)]="newtoken.permissions.users"> Users
+      </label>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <span class="btn-group float-sm-right" style="margin-top:5px">
+      <span (click)="o('OK')" [class.active]="newtoken.name" class="btn btn-primary">Create</span>
+      <span (click)="c('Close')" class="btn btn-secondary">Cancel</span>
+    </span>
+  </div>
+</template>
+
+<div class="col-md-8 offset-md-2">
+  <div>
+    <h2 class="title is-4">Tokens
+      <span class="btn-group btn-group-sm float-sm-right" style="margin-top:5px">
+        <button (click)="open(content)" data-toggle="tooltip" data-placement="top" title="Create token" class="btn btn-secondary"><i class="fa fa-plus" aria-hidden="true"></i></button>
+        <button (click)="loadData()" data-toggle="tooltip" data-placement="top" title="Refresh" class="btn btn-secondary"><i class="fa fa-refresh" aria-hidden="true"></i></button>
+      </span>
+    </h2>
+  </div>
+
+  <div class="has-text-centered">
+    <pagination-controls id="advanced"
+                        maxSize="7"
+                        directionLinks="true"
+                        autoHide="false"
+                        previousLabel="Previous"
+                        nextLabel="Next"
+                        screenReaderPaginationLabel="Pagination"
+                        screenReaderPageLabel="page"
+                        screenReaderCurrentLabel="You\'re on page"
+                        (pageChange)="onPageChange($event)"></pagination-controls>
+  </div>
+  
+  <div class="list-group">
+    <div *ngFor="let token of model | paginate: config" class="list-group-item">
+      <div class="d-block w-100">
+        <h3 class="list-group-item-heading">{{token.name}}
+          <span class="btn-group btn-group-sm float-sm-right">
+            <button ngxClipboard cbContent="{{token.value}}" data-toggle="tooltip" data-placement="top" title="Copy to clipboard" class="btn btn-secondary"><i class="fa fa-files-o" aria-hidden="true"></i></button>
+            <button (click)="deleteToken(token.id)" data-toggle="tooltip" data-placement="top" title="Delete" class="btn btn-secondary"><i class="fa fa-trash" aria-hidden="true"></i></button>
+          </span>
+        </h3>
+        <span *ngFor="let perm of token.permissions">
+          <span class="badge badge-primary">{{perm}}</span>&nbsp;
+        </span>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,39 @@
+<div class="col-md-8 offset-md-2">
+  <div>
+    <h2 class="title is-4">Infrastructure
+      <span class="btn-group btn-group-sm float-sm-right" style="margin-top:5px">
+        <button (click)="toggleEdit()" title="Modify" [class.active]="editable" class="btn btn-secondary"><i class="fa fa-wrench" aria-hidden="true"></i></button>
+        <button (click)="loadData()" data-toggle="tooltip" data-placement="top" title="Refresh" class="btn btn-secondary"><i class="fa fa-refresh" aria-hidden="true"></i></button>
+      </span>
+    </h2>
+  </div>
+
+  <div class="container-fluid"> 
+    <div *ngFor="let key of modelKeys" class="row">
+      <div class="col-md-12">
+        <h4>{{key}}
+          <span class="float-sm-right">
+            {{model[key].running.length}} / {{model[key].max}}
+          </span>
+        </h4>
+      </div>
+
+      <div *ngFor="let exec of model[key].running" class="col-md-3 process-slot">
+        <div class="panel card alert-success panel-slot">
+          <div class="panel-heading heading-only">
+            <span *ngIf="editable" (click)="terminateProcess(exec.pmid)" data-toggle="tooltip" data-placement="top" title="Kill" class="float-sm-right"><i class="fa fa-times" aria-hidden="true"></i></span>
+            {{exec.execName}}
+          </div>
+        </div>
+      </div>
+
+      <div *appCount="model[key].max - model[key].running.length" class="col-md-3 process-slot">
+        <div class="panel card alert-warning panel-slot">
+          <div class="panel-heading heading-only">
+            idle
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

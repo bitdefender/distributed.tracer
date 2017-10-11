@@ -1,0 +1,16 @@
+<div class="col-md-8 offset-md-2 details-content">
+  <h2 class="title is-4">{{model?.name}}</h2>
+  
+  <ul class="nav nav-tabs">
+    <li class="nav-item"><a class="nav-link" routerLinkActive="active" routerLink="general">General</a></li>
+    <li class="nav-item"><a class="nav-link" routerLinkActive="active" routerLink="corpus">Corpus</a></li>
+    <li class="nav-item"><a class="nav-link" routerLinkActive="active" routerLink="resources">Resources</a></li>
+    <li class="nav-item"><a class="nav-link" routerLinkActive="active" routerLink="tests">Tests</a></li>
+    <li class="nav-item"><a class="nav-link" routerLinkActive="active" routerLink="graph">Graph</a></li>
+  </ul>
+  <br />
+  <div>
+    <router-outlet></router-outlet>
+  </div>
+  <br />
+</div>
