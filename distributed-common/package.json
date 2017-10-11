@@ -1,0 +1,56 @@
+{
+  "_args": [
+    [
+      {
+        "raw": "distributed-common@file:./deps/distributed-common",
+        "scope": null,
+        "escapedName": "distributed-common",
+        "name": "distributed-common",
+        "rawSpec": "file:./deps/distributed-common",
+        "spec": "D:\\wrk\\distributed.tracer.meta\\mongo.rabbit.bridge\\deps\\distributed-common",
+        "type": "directory"
+      },
+      "D:\\wrk\\distributed.tracer.meta\\mongo.rabbit.bridge"
+    ]
+  ],
+  "_from": "deps\\distributed-common",
+  "_id": "distributed-common@0.0.1",
+  "_inCache": true,
+  "_location": "/distributed-common",
+  "_phantomChildren": {},
+  "_requested": {
+    "raw": "distributed-common@file:./deps/distributed-common",
+    "scope": null,
+    "escapedName": "distributed-common",
+    "name": "distributed-common",
+    "rawSpec": "file:./deps/distributed-common",
+    "spec": "D:\\wrk\\distributed.tracer.meta\\mongo.rabbit.bridge\\deps\\distributed-common",
+    "type": "directory"
+  },
+  "_requiredBy": [
+    "/"
+  ],
+  "_resolved": "file:deps\\distributed-common",
+  "_shasum": "b55d4cc76149f88fc8b45fcf79d2d710fe5a5c73",
+  "_shrinkwrap": null,
+  "_spec": "distributed-common@file:./deps/distributed-common",
+  "_where": "D:\\wrk\\distributed.tracer.meta\\mongo.rabbit.bridge",
+  "author": {
+    "name": "Teodor Stoenescu",
+    "email": "tstoenescu@bitdefender.com"
+  },
+  "dependencies": {
+    "commander": "^2.9.0"
+  },
+  "description": "Common functionality of the distributed tracer.",
+  "devDependencies": {},
+  "license": "ISC",
+  "main": "index.js",
+  "name": "distributed-common",
+  "optionalDependencies": {},
+  "readme": "ERROR: No README data found!",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "version": "0.0.1"
+}

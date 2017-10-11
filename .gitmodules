@@ -1,9 +1,6 @@
 [submodule "tracer.node"]
 	path = tracer.node
 	url = https://github.com/teodor-stoenescu/tracer.node.git
-[submodule "mongo.rabbit.bridge"]
-	path = mongo.rabbit.bridge
-	url = https://github.com/teodor-stoenescu/mongo.rabbit.bridge.git
 [submodule "web.interface"]
 	path = web.interface
 	url = https://github.com/teodor-stoenescu/web.interface.git
