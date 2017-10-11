@@ -41,7 +41,7 @@ start_tracer() {
       # unpack corpus
       echo -e "\033[0;32m[DRIVER] Unpacking corpus ..."; echo -e "\033[0m"
       if [ ! -d $CORPUS_DIR ]; then
-        unzip $CORPUS_PATH -d $CORPUS_DIR
+        unzip $CORPUS_PATH -d $CORPUS_DIR > /dev/null
         break
       fi
     fi
@@ -125,6 +125,10 @@ cleanup() {
     rm -rf $RESULTS_DIR
   fi
 
+  if [ -d $CORPUS_DIR ]; then
+    rm -rf $CORPUS_DIR
+  fi
+
   if [ ! -d $LOGS_DIR ]; then
     mkdir -p $LOGS_DIR
   fi
@@ -163,10 +167,10 @@ generate_testcases() {
   done
 
   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
-  if [ ! -d "$RESULTS_DIR/results" ]; then
-    mkdir -p "$RESULTS_DIR/results"
+  if [ ! -d "$RESULTS_DIR" ]; then
+    mkdir -p "$RESULTS_DIR"
     ## init results with initial corpus
-    cp -r $CORPUS_DIR/* $RESULTS_DIR/
+    cp $CORPUS_DIR/* $RESULTS_DIR/
   fi
 
   cd $PROCESS_MANAGER
@@ -257,6 +261,7 @@ main() {
     stop_tracer
     stop_state_aggregator
     stop_griver
+    rm -fr ${ID_LOGS_DIR}_${runs}_${i}
     mv $ID_LOGS_DIR ${ID_LOGS_DIR}_${runs}_${i}
 
   done

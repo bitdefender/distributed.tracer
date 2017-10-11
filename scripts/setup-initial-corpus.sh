@@ -41,10 +41,9 @@ while true; do
   name=$(echo $item | jq '.name')
   name=$(sed -e 's/^"//' -e 's/"$//' <<<"$name")
 
-  if [ "$name" != "http-parser" ]; then
-    if [ "$name" != "libjsmn" ]; then
-      continue
-    fi
+  ## skip freetype
+  if [ "$name" == "freetype" ]; then
+    continue
   fi
 
   ## generate corpus
@@ -57,6 +56,7 @@ while true; do
   build_target_and_fuzzer "$name" "-corpus-dir=$INITIAL_CORPUS_DIR"
   cd $INITIAL_CORPUS_DIR
   zip -r $INITIAL_CORPUS_ZIP .
+  cd -
 
   ## send corpus to webapi
   curl -s --insecure -X POST \
