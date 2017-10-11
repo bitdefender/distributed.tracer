@@ -1,0 +1,22 @@
+{
+  "name": "state.manager",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axon": "^2.0.3",
+    "axon-rpc": "0.0.3",
+    "distributed-common": "file:./../distributed-common",
+    "lodash": "^4.17.4",
+    "mongodb": "^2.2.29",
+    "mongoskin": "^2.1.0",
+    "q": "^1.5.0",
+    "randomstring": "^1.1.5",
+    "safe-eval": "^0.3.0"
+  }
+}
