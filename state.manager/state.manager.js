@@ -31,7 +31,6 @@ function MongoCode(code) {
 }
 
 const mrCode = MongoCode(bbmongo);
-console.dir(mrCode);
 
 /*const mrCode = new Code(
 	require('fs').readFileSync(

@@ -43,7 +43,6 @@ module.exports = exports = {
 			var cfg = fs.readFileSync(configFile);
 			configuration = JSON.parse(cfg);
 
-			console.log(configuration);
 			return true;
 		} catch (ex) {
 			return false;
