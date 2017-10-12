@@ -97,7 +97,7 @@ def generate_graph(baseline, cardinal):
         data[k] = sort_dict(data[k])
 
     df = pandas.DataFrame.from_dict(data, orient='index').sort_index()
-    df = df.reindex_axis(sorted(df.columns), axis=1)
+    df = df.reindex_axis(sorted(df.columns, reverse=True), axis=1)
     df.plot(kind='barh', color=['green', 'red', 'magenta', 'cyan', 'yellow',
         'black', 'gray', 'pink', 'blue', 'crimson', 'violet', 'lightgreen'])
     plt.axvline(x=1.0)
