@@ -124,11 +124,8 @@ function CreateProcesses(processName, execId, processArgs, count, cb) {
           if (arg.indexOf("-binary_id=") != -1) {
             arg = util.format(arg, execId);
           }
-          if (arg.indexOf("/results") != -1) {
-            arg = util.format(arg, execId);
-          }
           if (arg.indexOf("-results_csv=") != -1) {
-            arg = util.format(arg, execId, mpid);
+            arg = util.format(arg, mpid);
           }
         }
         cfg.args.push(arg);

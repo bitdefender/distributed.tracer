@@ -22,34 +22,34 @@
     },
     "basic.fuzzer": {
         "script": "../../tracer.node/%s/fuzzer",
-        "cwd": "../tracer.node/%s",
+        "cwd": "../%s/crashes/",
         "logfile": "../../%s/logs/basicfuzzer-%s.log",
         "autorestart": false,
         "args": [
-            "../../%s/results",
+            "../results",
             "-close_fd_mask=3",
             "-dump_to_db=1",
             "-config=../../config.json",
             "-print_final_stats=1",
             "-fast_corpus=0",
-            "-results_csv=../../%s/logs/basic-%s.csv",
+            "-results_csv=../logs/basic-%s.csv",
             "-binary_id=%s"
         ]
     },
     "eval.fuzzer": {
         "script": "../../tracer.node/%s/fuzzer",
-        "cwd": "../tracer.node/%s",
+        "cwd": "../%s/crashes/",
         "logfile": "../../%s/logs/evalfuzzer-%s.log",
         "autorestart": false,
         "args": [
-            "../../%s/results",
+            "../results",
             "-close_fd_mask=3",
             "-initial_corpus_db=1",
             "-river=1",
             "-config=../../config.json",
             "-print_final_stats=1",
             "-fast_corpus=0",
-            "-results_csv=../../%s/logs/eval-%s.csv",
+            "-results_csv=../logs/eval-%s.csv",
             "-binary_id=%s"
         ]
     },

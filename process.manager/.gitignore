@@ -31,3 +31,6 @@ Release/
 
 # River SDK
 include/
+
+# Config
+.env
