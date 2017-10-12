@@ -39,7 +39,8 @@ switch (verb) {
         break;
 	case "coverage":
 		sq.GetCoverage().then((coverage) => {
-			console.log("{coverage : " + coverage + "}")
+      res = {"coverage" : coverage}
+			console.log(res)
 			process.exit(0);
 		});
 		break;
