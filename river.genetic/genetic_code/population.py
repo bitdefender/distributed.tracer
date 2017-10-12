@@ -62,10 +62,9 @@ class Population:
 		return sum / (len(self.individuals) * 1.0)
 
 	def __str__(self):
-		res = "{ Avg fitness" + str(self.getAvgFitness()) + " \n"
-		for i in range(len(self.individuals)):
-			res = res + str(self.individuals[i]) + " \n"
-		res += "}"
+		res = "{ Avg fitness" + str(self.getAvgFitness()) + "}"
+		#for i in range(len(self.individuals)):
+		#	res = res + str(self.individuals[i]) + " \n"
 		return res
 
 	def getpopulation(self):

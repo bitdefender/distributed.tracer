@@ -136,13 +136,16 @@ def readParams():
     #  Set template for a input entry
     entryType_TestName              = 0x0010
     entryType_Module                = 0x00B0
+    entryType_NextModule            = 0x00C0
     entryType_Offset                = 0x00BB
     entryType_InputUsage            = 0x00AA
-    EntryTemplate                   = namedtuple("t", "hF hS oF oS TN TM TO TIU") # header format, header size, offset format, offset size
+    entryType_NextOffset            = 0x00A0
+    EntryTemplate                   = namedtuple("t", "hF hS oF oS TN TM TO TIU TNM TNO") # header format, header size, offset format, offset size
     headerFtm                       = 'h h'
     offsetFtm                       = 'I h h h'
     Params.entryTemplate            = EntryTemplate(hF = headerFtm, hS = struct.calcsize(headerFtm), oF = offsetFtm, oS = struct.calcsize(offsetFtm),
-                                                    TN = entryType_TestName, TM = entryType_Module, TO = entryType_Offset, TIU = entryType_InputUsage)
+                                                    TN = entryType_TestName, TM = entryType_Module, TO = entryType_Offset, TIU = entryType_InputUsage,
+                                                    TNO = entryType_NextOffset, TNM = entryType_NextModule)
 
     if Params.populationSize < 2:
         print("EROR: Please set a valid population size >=2" )
@@ -178,7 +181,8 @@ def getFolderPathFromId(ithFolder):
     return logsFullPath + "/generation" + str(ithFolder)
 
 def getResultsPath():
-    return os.path.join(logsFullPath, "results")
+    #return os.path.join(logsFullPath, "results")
+    return logsFullPath
 
 def getBlockOffsetEntryFromLine(line):
     if len(line.split()) != 5:
@@ -254,11 +258,17 @@ def getNextEntryFromStream(dataStream, streamPos, entryTemplate):
     cost = 0
     jumpType = 0
     jumpInstruction = 0
+    nextoffset = 0
+    nextModule = ''
 
     if type == entryTemplate.TN or type == entryTemplate.TM: # test name or module name type
         # do something
         nameString = dataStream[streamPos: streamPos + length]
 
+        entrySize = headerSize + length
+        streamPos += length
+    elif type == entryTemplate.TNM: ## if next module is specified
+        nextModule = dataStream[streamPos: streamPos + length]
         entrySize = headerSize + length
         streamPos += length
     elif type == entryTemplate.TO: # pffset type
@@ -270,6 +280,10 @@ def getNextEntryFromStream(dataStream, streamPos, entryTemplate):
 
         entrySize = headerSize + length
         streamPos += length ## offsetInfoSize == 10 != 12 (alignment issue)
+    elif type == entryTemplate.TNO: # next offset type
+        nextoffset = struct.unpack_from('I', dataStream, streamPos)
+        entrySize = headerSize + length
+        streamPos += length
     elif type == entryTemplate.TIU:
         print("Input usage: Not supported")
         exit(1)
@@ -277,7 +291,8 @@ def getNextEntryFromStream(dataStream, streamPos, entryTemplate):
         assert 1 == 0 # Unknown type !!!
 
 
-    return (type, length, nameString, offset, cost, jumpType, jumpInstruction, entrySize)
+    return (type, length, nameString, offset, cost, jumpType,
+            jumpInstruction, entrySize, nextModule, nextoffset)
 
 
 class ParamsType:

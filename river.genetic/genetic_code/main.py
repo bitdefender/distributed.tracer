@@ -192,7 +192,7 @@ def main(argv=None):
 	# TODO CPADURARU: environment variables
 	# subprocess.Popen("sh stub_env_variables_genetic_code.sh", shell=True)
     Params = utils.readParams()
-    utils.clearLogsDirectory()
+    ## logs dir is cleared by cardinal and input corpus is added by tracer.node
 
     configHandler = ConfigHandler(Params.config)
     mongoHandler = MongoHandler(Params.executableId, configHandler)

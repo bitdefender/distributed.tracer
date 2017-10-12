@@ -34,6 +34,8 @@ class EvalFunctors:
         entryType_TestName = self.entryTemplate.TN
         entryType_Module = self.entryTemplate.TM
         entryType_Offset = self.entryTemplate.TO
+        entryType_NextModule = self.entryTemplate.TNM
+        entryType_NextOffset = self.entryTemplate.TNO
 
         streamPos = 0
         currModuleName = None
@@ -43,6 +45,7 @@ class EvalFunctors:
         while streamPos < streamSize:
             currOffset = -1
 
+            ## read next entry
             entry           = utils.getNextEntryFromStream(dataStream, streamPos, self.entryTemplate)
             type            = entry[0]
             len             = entry[1]
@@ -52,14 +55,16 @@ class EvalFunctors:
             jumpType        = entry[5]
             jumpInstruction = entry[6]
             entrySize       = entry[7]
-            ##print("type: 0x%X len: %d module:%s offset: 0x%X cost: %d jumpType: 0x%X jumpInstruction: 0x%X %d" % entry)
+            nextModule      = entry[8]
+            nextoffset      = entry[9]
 
             streamPos += entrySize
 
             if type == entryType_Module:
                 currModuleName = moduleString
-                print(moduleString)
                 currentOffsetToEntryIndex = self.Mapping[currModuleName] if currModuleName in self.Mapping else None    # Update the current map to search to
+            elif type == entryType_NextModule:
+                currNextModuleName = nextModule
             elif type == entryType_Offset:
                 # use here currModuleName#offset
 
@@ -86,6 +91,8 @@ class EvalFunctors:
 
             elif type == entryType_TestName:
                 continue  # we are not interested in this type of data
+            elif type == entryType_NextOffset:
+                continue
 
         return 1.0 - pathProbability
 

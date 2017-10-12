@@ -158,8 +158,20 @@ Logs can be seen in the above provided files.
         100
         
    To run the program in parallel, use --isParallelExecution 1 and do the same setup for invoking Spark as in 2.
-    
- 4.3 TODO list:
+
+ 4.3 Cardinal Integration
+
+   Inside Cardinal, river.genetic reads testcases from traced queues and generates new testcases based on basic block transition costs heuristics.
+
+      To test river.genetic with Cardinal integration, use:
+      --driver                # enables reading testcases from traced queues
+      1
+      --config                # specify Cardinal configuration file path
+      <config-path>
+      --executableId          # specify the binary id that coresponds to input traces
+      <exec-id>
+
+ 4.4 TODO list:
  
      A) Create a CPP module for the genetic algorithm and use it from python because it's very slow (2-4 times slower than in CPP)
      
