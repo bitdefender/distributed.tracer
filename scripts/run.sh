@@ -259,6 +259,12 @@ main() {
     ## cleanup
     stop_fuzzers
     stop_tracer
+    ## query global coverage state for Cardinal coverage indicator
+    cd $STATE_MANAGER
+    cardinal_coverage=$(node statecli.js -c ../config.json \
+      $binary_id coverage | jq '.coverage')
+    cd -
+    echo -e "${binary_id}\t${i}\t${cardinal_coverage}" >> ${LOGS_DIR}/cardinal.csv
     stop_state_aggregator
     stop_griver
     rm -fr ${ID_LOGS_DIR}_${runs}_${i}
