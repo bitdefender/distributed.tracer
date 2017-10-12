@@ -38,7 +38,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(session({ secret: common.interface.GetSecret(), resave: false, saveUninitialized: true }));
 
 // Point static path to dist
-app.use(express.static(path.join(__dirname, 'dist')));
+app.use(express.static(path.join(__dirname, '..', 'web.interface', 'dist')));
 
 // use JWT auth to secure the api
 app.use(

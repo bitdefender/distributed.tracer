@@ -1,8 +1,12 @@
 import { Component, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { NgbPopover } from '@ng-bootstrap/ng-bootstrap';
 
-var $ = require('jquery');
-var scrollify = require('jquery-scrollify');
+//var $ = require('jquery');
+declare var jquery:any; 
+declare var $:any;
+var scrollify:any = $.scrollify;
+
+//var scrollify = require('jquery-scrollify');
 
 @Component({
   selector: 'app-slideshow',
