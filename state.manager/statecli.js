@@ -7,12 +7,13 @@ if (!common.Init()) {
 }
 
 if (process.argv.length < 4) {
-    console.log("Usage: node index.js {options} executable_id [purge|clean]\n");
+    console.log("Usage: node index.js {options} executable_id [purge|clean|coverage]\n");
     return;
 }
 var execId = process.argv[process.argv.length - 2];
 var verb = process.argv[process.argv.length - 1];
 
+var sq = new stateman.StateQuery(execId);
 var mgr = new stateman.StateCleaner(execId);
 
 switch (verb) {
@@ -36,9 +37,15 @@ switch (verb) {
             process.exit(0);
         });
         break;
+	case "coverage":
+		sq.GetCoverage().then((coverage) => {
+			console.log("{coverage : " + coverage + "}")
+			process.exit(0);
+		});
+		break;
 
     default :
-        console.log("Usage: node index.js {options} executable_id [clean|fullclean]\n");
+        console.log("Usage: node index.js {options} executable_id [purge|clean|coverage]\n");
         return;
 };
 

@@ -124,6 +124,29 @@ StateQuery.prototype.Get = function() {
     return deferred.promise;
 }
 
+StateQuery.prototype.GetCoverage = function() {
+	var deferred = Q.defer();
+	var _this = this;
+
+	this.lastReady.then(() => {
+		state.AcquireGlobalCollection(_this.execId).then((cName) => {
+			var coll = state.GetGlobalCollection(cName);
+
+			var ret = coll.global.count((err, ret) => {
+				if (err) {
+					console.log(err);
+					deferred.reject(err);
+				} else {
+					deferred.resolve(ret);
+				}
+			});
+
+		});
+	});
+
+	this.lastReady = deferred.promise;
+	return deferred.promise;
+}
 
 function StateCleaner(execId) {
     this.execId = execId;

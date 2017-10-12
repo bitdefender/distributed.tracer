@@ -1,6 +1,9 @@
-const ENTRY_TYPE_TEST_NAME = 0x0010;
-const ENTRY_TYPE_BB_MODULE = 0x00B0;
-const ENTRY_TYPE_BB_OFFSET = 0x00BB;
+const ENTRY_TYPE_TEST_NAME = 0x0010
+const ENTRY_TYPE_BB_MODULE = 0x00B0
+const ENTRY_TYPE_BB_NEXT_MODULE = 0x00C0
+const ENTRY_TYPE_BB_OFFSETET = 0x00BB
+const ENTRY_TYPE_INPUT_USAGE = 0x00AA
+const ENTRY_TYPE_BB_OFFSET_NEXT_OFFSET = 0x00A0
 
 function* ParseBinTrace(trace) {
     var bin;
@@ -18,22 +21,24 @@ function* ParseBinTrace(trace) {
 		var entryType = bin.readInt16LE(offset);
         var entryLength = bin.readInt16LE(offset + 2);
 		offset += 4;
-		
+
 		if (ENTRY_TYPE_TEST_NAME == entryType) {
-        } else if (ENTRY_TYPE_BB_MODULE == entryType) {
+		} else if (ENTRY_TYPE_BB_NEXT_MODULE == entryType) {
+		} else if (ENTRY_TYPE_BB_MODULE == entryType) {
 			lastModule = bin.toString('ascii', offset, offset + entryLength - 1);
         } else if (ENTRY_TYPE_BB_OFFSET == entryType) {
 			var off = bin.readInt32LE(offset);
             var cost = bin.readInt16LE(offset + 4);
             var jumpType = bin.readInt16LE(offset + 6);
-			
+
             yield {
                 module : lastModule,
                 offset : off,
                 cost : cost,
                 jumpType : jumpType
             };
-        }
+		} else if (ENTRY_TYPE_BB_OFFSET_NEXT_OFFSET == entryType) {
+		}
 
 		offset += entryLength;
     }
