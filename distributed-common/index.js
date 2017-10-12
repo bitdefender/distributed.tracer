@@ -33,14 +33,13 @@ module.exports = exports = {
 	"Init" : () => {
 		try {
 			commander
-				.option('-c, --config [config_file]', 'Configuration file')
+				.option('-c, --config [config_file]', 'Configuration file', "config.json")
 				.parse(process.argv);
 		} catch (ex) {
 		}
 
 		try {
-			var configFile = commander.config_file || "config.json";
-			console.log("Using config " + configFile);
+			var configFile = commander.config;
 			var cfg = fs.readFileSync(configFile);
 			configuration = JSON.parse(cfg);
 
@@ -61,9 +60,19 @@ module.exports = exports = {
 			return configuration.rabbit.flow.prefix + "." + configuration.rabbit.flow.new;
 		},
 
+		"GetTracedTests" : () => {
+			return configuration.rabbit.flow.prefix + "." + configuration.rabbit.flow.traced;
+		},
+
 		"GetNewQueue" : (executableId) => {
 			return configuration.rabbit.flow.prefix + "." + 
 				configuration.rabbit.flow.new + "." +
+				executableId;
+		},
+
+		"GetTracedQueue" : (executableId) => {
+			return configuration.rabbit.flow.prefix + "." + 
+				configuration.rabbit.flow.traced + "." +
 				executableId;
 		},
 
@@ -76,15 +85,69 @@ module.exports = exports = {
 
 	"mongo" : {
 		"GetUrl" : () => {
-			return GetUrl('mongodb', configuration.mongo) + configuration.mongo.database;
+			var auth = '';
+			if (configuration.mongo.authdb) {
+				auth = '?authSource=' + configuration.mongo.authdb
+			}
+			return GetUrl('mongodb', configuration.mongo) + configuration.mongo.database + auth;
 		},
 
 		"GetOplogUrl" : () => {
-			return GetUrl('mongodb', configuration.mongo) + "local";
+			var auth = '';
+			if (configuration.mongo.authdb) {
+				auth = '?authSource=' + configuration.mongo.authdb
+			}
+			return GetUrl('mongodb', configuration.mongo) + "local" + auth;
 		},
 
 		"GetDatabase" : () => {
 			return configuration.mongo.database;
+		},
+
+		"GetCollection" : (executableId) => {
+			return configuration.mongo.prefix + executableId;
+		},
+
+		"GetTestsCollection" : (executableId) => {
+			return configuration.mongo.testsPrefix + executableId;
+		},
+
+		"GetStateTocCollection" : (executableId) => {
+			return configuration.mongo.tocPrefix + executableId;
+		},
+
+		"GetStateGlobalCollection" : (executableId, suffix) => {
+			return configuration.mongo.stateGlobalPrefix + executableId + "_" + suffix;
+		},
+
+		"IsStateGlobalCollection" : (executableId, collName) => {
+			return collName.startsWith(configuration.mongo.stateGlobalPrefix + executableId + "_");
+		},
+
+		"GetStateLocalCollection" : (executableId, suffix) => {
+			return configuration.mongo.stateLocalPrefix + executableId + "_" + suffix;
+		},
+
+		"IsStateLocalCollection" : (executableId, collName) => {
+			return collName.startsWith(configuration.mongo.stateLocalPrefix + executableId + "_");
+		}
+	},
+
+	"interface" : {
+		"GetSecret" : () => {
+			return configuration.interface.secret;
+		},
+
+		"GetPublicPort" : () => {
+			return configuration.interface.publicport;
+		},
+
+		"GetHTTPSPort" : () => {
+			return configuration.interface.port;
+		},
+
+		"GetHTTPPort" : () => {
+			return configuration.interface.httpport;
 		}
 	}
 };
