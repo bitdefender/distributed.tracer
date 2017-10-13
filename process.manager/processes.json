@@ -8,7 +8,7 @@
             "../config.json"
         ],
         "env": {
-            "LD_LIBRARY_PATH": "./node_modules/node-river/serial.tracer/river.sdk/lin/lib/:/data/simpletracer/build-river-tools/lib"
+            "LD_LIBRARY_PATH": "./node_modules/node-river/serial.tracer/river.sdk/lin/lib/:/data/distributed.tracer/tracer.node/deps/node-river/serial.tracer/build-river-tools/lib"
         }
     },
     "state.aggregator": {
@@ -91,8 +91,8 @@
             "SPARK_LOCAL_IP": "10.18.0.32",
             "PYTHONUNBUFFERED": 1,
             "SIMPLETRACERLOGSPATH": "%s/../%s/results",
-            "SIMPLETRACERPATH":"/data/simpletracer/build-river-tools/bin/river.tracer",
-            "LD_LIBRARY_PATH": "/data/simpletracer/build-river-tools/lib:/data/simpletracer/river.sdk/lin/lib"
+            "SIMPLETRACERPATH":"/data/distributed.tracer/tracer.node/deps/node-river/serial.tracer/build-river-tools/bin/river.tracer",
+            "LD_LIBRARY_PATH": "/data/distributed.tracer/tracer.node/deps/node-river/serial.tracer/build-river-tools/lib:/data/distributed.tracer/tracer.node/deps/node-river/serial.tracer/river.sdk/lin/lib"
         }
     }
 }
