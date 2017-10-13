@@ -26,10 +26,10 @@ function FlushCacheBB(collection) {
     }
 }
 
-function GetBB(collection, module, offset) {
+function GetBB(collection, bb) {
     var deferred = Q.defer();
     var query = {
-		_id: bbdata.Id(module, offset)
+		_id: bbdata.Id(bb.module, bb.offset)
 	};
 
     FlushCacheBB(collection);
@@ -87,7 +87,7 @@ function GetBB(collection, module, offset) {
             var ret;
             switch (retarr.length) {
                 case 0:
-                    ret = bbdata.Zero(module, offset);
+                    ret = bbdata.Zero(bb);
                     break;
                 case 1:
                     ret = retarr[0];
@@ -113,7 +113,15 @@ function GetBB(collection, module, offset) {
 }
 
 function UpdateBB(bb, delta) {
-    var oldBB = localCache[bb._id] || bbdata.Zero(bb.value.address.module, bb.value.address.offset);
+    var asBBStruct = {
+        module : bb.value.address.module,
+        offset : bb.value.address.offset,
+        next : [
+            bb.value.address.taken,
+            bb.value.address.nottaken
+        ]
+    };
+    var oldBB = localCache[bb._id] || bbdata.Zero(asBBStruct);
 
     localCache[bb._id] = bbdata.ReduceFull(oldBB, delta);
     localCache[bb._id].changed = true;

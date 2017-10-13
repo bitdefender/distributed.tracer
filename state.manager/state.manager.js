@@ -396,8 +396,8 @@ function GenerateNewGlobal(execId) {
 										console.log(err);
 									}
 
-									console.dir(collection);
-									console.dir(stats);
+									//console.dir(collection);
+									//console.dir(stats);
 
 									db.collection(c.name).drop(
 										function(err, reply) {
@@ -482,12 +482,13 @@ function AddTrace(collection, trace) {
     
     var processBB = function(thebb, nxbb) {
         return function(r) {
-			return bb.Get(collection, thebb.module, thebb.offset)
+			return bb.Get(collection, thebb)
 			.then(function(data) {
 				if (null === nxbb) {
-					return bb.Update(data, bbdata.New(thebb.module, thebb.offset));
+					// won't reach this call because <end> doesn't get into db
+					return bb.Update(data, bbdata.New(thebb));
 				} else {
-        			return bb.Update(data, bbdata.New(thebb.module, thebb.offset, nxbb.module, nxbb.offset));
+        			return bb.Update(data, bbdata.New(thebb, nxbb));
 				}
 			});
 		};

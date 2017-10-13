@@ -188,13 +188,13 @@ function UnionKeys(obj1, obj2) {
 
 const bbPlugins = {
     address: {
-        zero: (module, offset) => {
-            if ('<begin>' == module) {
+        zero: (bb) => {
+            if ('<begin>' == bb.module) {
                 return {
                     module: '<begin>',
                     offset: 0
                 };
-            } else if ('<end>' == module) {
+            } else if ('<end>' == bb.module) {
                 return {
                     module: '<end>',
                     offset: 0
@@ -202,18 +202,20 @@ const bbPlugins = {
             }
 
             return {
-                module: module,
-                offset: offset
+                module: bb.module,
+                offset: bb.offset,
+                taken: bb.next[0],
+                nottaken: bb.next[1]
             };
         },
 
-        emit: function(module, offset, nextModule, nextOffset) { 
-            if ('<begin>' == module) {
+        emit: function(prev, next) { 
+            if ('<begin>' == prev.module) {
                 return {
                     module: '<begin>',
                     offset: 0
                 };
-            } else if ('<end>' == module) {
+            } else if ('<end>' == prev.module) {
                 return {
                     module: '<end>',
                     offset: 0
@@ -221,33 +223,39 @@ const bbPlugins = {
             }
             
             return { 
-                module: module,
-                offset: offset
+                module: prev.module,
+                offset: prev.offset,
+				taken: prev.next[0],
+				nottaken: prev.next[1]
+
             };
         },
 
         reduce: function(d1, d2) {
+            var d = ("undefined" !== typeof(d1)) ? d1 : d2;
             return {
-                module: ("undefined" !== typeof(d1.module)) ? d1.module : d2.module,
-                offset: ("undefined" !== typeof(d1.offset)) ? d1.offset : d2.offset
+                module: d.module,
+                offset: d.offset,
+                taken: d.taken,
+                nottaken: d.nottaken
             }; // since d1 == d2
         }
     },
     global: {
-        zero: () => {
+        zero: (bb) => {
             return {
                 count: 0,
                 next: { }
             }
         },
 
-        emit: function(module, offset, nextModule, nextOffset) { 
+        emit: function(prev, next) {
             var ret = { 
                 count: 1,
                 next: { }
             };
 
-            ret.next[Id(nextModule, nextOffset)] = 1;
+            ret.next[Id(next.module, next.offset)] = 1;
             return ret;
         },
 
@@ -267,40 +275,41 @@ const bbPlugins = {
     }
 }
 
-function ZeroBBData(module, offset) {
+function ZeroBBData(bb) {
     var ret = {
         value: {}
     };
 
     for (var p in bbPlugins) {
-        ret.value[p] = bbPlugins[p].zero(module, offset);
+        ret.value[p] = bbPlugins[p].zero(bb);
     }
 
     return ret;
 }
 
-function NewBBData(module, offset, nextModule, nextOffset) {
+function NewBBData(prev, next) {
     var ret = {
         value: {}
     };
 
     for (var p in bbPlugins) {
-        ret.value[p] = bbPlugins[p].emit(module, offset, nextModule, nextOffset);
+        ret.value[p] = bbPlugins[p].emit(prev, next);
     }
 
     return ret;
 }
 
-function Zero(module, offset) {
-    var ret = ZeroBBData(module, offset);
-    ret._id = Id(module, offset);
-    
+// bb : {module, offset, next[{module, offset}]
+function Zero(bb) {
+    var ret = ZeroBBData(bb);
+    ret._id = Id(bb.module, bb.offset);
+
     return ret;
 }
 
-function New(module, offset, nextModule, nextOffset) {
-    var ret = NewBBData(module, offset, nextModule, nextOffset);
-    ret._id = Id(module, offset);
+function New(prev, next) {
+    var ret = NewBBData(prev, next);
+    ret._id = Id(prev.module, prev.offset);
     
     return ret;
 }
@@ -324,8 +333,16 @@ function Reduce(d) {
     var ret = {};
     var dz = d[0];
 
+    var asBBStruct = {
+        module : dz.value.address.module,
+        offset : dz.value.address.offset,
+        next : [
+            dz.value.address.taken,
+            dz.value.address.nottaken
+        ]
+    };
     for (var p in bbPlugins) {
-        ret[p] = bbPlugins[p].zero(dz.value.address.module, dz.value.address.offset);
+        ret[p] = bbPlugins[p].zero(asBBStruct);
     }
     
     for (var dx in d) {

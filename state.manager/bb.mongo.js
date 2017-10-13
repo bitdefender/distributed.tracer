@@ -3,13 +3,13 @@ function Reduce(d) {
     
     const bbPlugins = {
         address: {
-            zero: (module, offset) => {
-                if ('<begin>' == module) {
+            zero: (bb) => {
+                if ('<begin>' == bb.module) {
                     return {
                         module: '<begin>',
                         offset: 0
                     };
-                } else if ('<end>' == module) {
+                } else if ('<end>' == bb.module) {
                     return {
                         module: '<end>',
                         offset: 0
@@ -17,20 +17,25 @@ function Reduce(d) {
                 }
 
                 return {
-                    module: module,
-                    offset: offset
+                    module: bb.module,
+                    offset: bb.offset,
+                    taken: bb.next[0],
+                    nottaken: bb.next[1]
                 };
             },
 
             reduce: function(d1, d2) {
-                return {
-                    module: ("undefined" !== typeof(d1.module)) ? d1.module : d2.module,
-                    offset: ("undefined" !== typeof(d1.offset)) ? d1.offset : d2.offset
-                }; // since d1 == d2
+				var d = ("undefined" !== typeof(d1)) ? d1 : d2;
+				return {
+					module: d.module,
+					offset: d.offset,
+					taken: d.taken,
+					nottaken: d.nottaken
+				};
             }
         },
         global: {
-            zero: () => {
+            zero: (bb) => {
                 return {
                     count: 0,
                     next: { }
@@ -63,8 +68,16 @@ function Reduce(d) {
     var ret = {};
     var dz = d[0];
 
+    var asBBStruct = {
+        module : dz.address.module,
+        offset : dz.address.offset,
+        next : [
+            dz.address.taken,
+            dz.address.nottaken
+        ]
+    };
     for (var p in bbPlugins) {
-        ret[p] = bbPlugins[p].zero();
+        ret[p] = bbPlugins[p].zero(asBBStruct);
     }
     
     for (var dx in d) {
