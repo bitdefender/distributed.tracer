@@ -45,7 +45,7 @@ function getGraph(req, res) {
                         outputorder : "edgesfirst"
                     }
                 );
-                
+
                 digraph.setNode(
                     "node",
                     {
@@ -108,12 +108,27 @@ function getGraph(req, res) {
                 for (var n in nodes) {
                     for (var e in nodes[n].value.global.next) {
                         if (digraph.hasNode(e)) {
+                            var nextId = e;
+                            var color = 0;
+
+                            if (nodes[n].value.address.taken !== null) {
+                                var takenId = nodes[n].value.address.taken._id;
+                                var notTakenId = nodes[n].value.address.nottaken._id;
+                                if (nextId == takenId) {
+                                      color = "#008000";
+                                } else if (nextId == notTakenId) {
+                                      color = "#FF0000";
+                                }
+                            }
+
                             digraph.setEdge(
                                 nodes[n]._id,
                                 e,
                                 {
                                     "label" : nodes[n].value.global.next[e],
-                                    "penwidth" : 1 + 9 * nodes[n].value.global.next[e] / maxEdge
+                                    "penwidth" : 1 + 9 * nodes[n].value.global.next[e] / maxEdge,
+                                    "style" : "filled",
+                                    "color" : color
                                 }
                             );
                         } else {

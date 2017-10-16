@@ -201,12 +201,17 @@ const bbPlugins = {
                 };
             }
 
-            return {
+            var ret = {
                 module: bb.module,
                 offset: bb.offset,
                 taken: bb.next[0],
                 nottaken: bb.next[1]
             };
+
+            // set ids for future comparisons
+            ret.taken._id = Id(ret.taken.module, ret.taken.offset);
+            ret.nottaken._id = Id(ret.nottaken.module, ret.nottaken.offset);
+            return ret;
         },
 
         emit: function(prev, next) { 

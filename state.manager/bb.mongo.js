@@ -16,13 +16,18 @@ function Reduce(d) {
                     };
                 }
 
-                return {
+                var ret = {
                     module: bb.module,
                     offset: bb.offset,
                     taken: bb.next[0],
                     nottaken: bb.next[1]
                 };
-            },
+
+                // set ids for future comparisons
+                ret.taken._id = Id(ret.taken.module, ret.taken.offset);
+                ret.nottaken._id = Id(ret.nottaken.module, ret.nottaken.offset);
+                return ret;
+			},
 
             reduce: function(d1, d2) {
 				var d = ("undefined" !== typeof(d1)) ? d1 : d2;
