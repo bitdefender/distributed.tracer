@@ -65,7 +65,7 @@ app.use('/api', require('./server/routes/api'));
 
 // Catch all other routes and return the index file
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'web.interface', 'dist'));
+  res.sendFile(path.join(__dirname, '..', 'web.interface', 'dist', 'index.html'));
 });
 
 app.use(function (err, req, res, next) {
