@@ -1,0 +1,3 @@
+[submodule "tracer.node/deps/node-river"]
+	path = tracer.node/deps/node-river
+	url = https://github.com/teodor-stoenescu/node-river.git
