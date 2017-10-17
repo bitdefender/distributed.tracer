@@ -29,5 +29,5 @@ Release/
 *.VC.db
 *.VC.opendb
 
-# River SDK
-include/
+# Tracer logs and results
+execution.log
