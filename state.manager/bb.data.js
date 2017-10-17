@@ -204,6 +204,8 @@ const bbPlugins = {
             var ret = {
                 module: bb.module,
                 offset: bb.offset,
+                jumpType: bb.jumpType,
+                jumpInstruction: bb.jumpInstruction,
                 taken: bb.next[0],
                 nottaken: bb.next[1]
             };
@@ -226,12 +228,14 @@ const bbPlugins = {
                     offset: 0
                 };
             }
-            
+
             return { 
                 module: prev.module,
                 offset: prev.offset,
-				taken: prev.next[0],
-				nottaken: prev.next[1]
+                jumpType: prev.jumpType,
+                jumpInstruction: prev.jumpInstruction,
+                taken: prev.next[0],
+                nottaken: prev.next[1]
 
             };
         },
@@ -241,6 +245,8 @@ const bbPlugins = {
             return {
                 module: d.module,
                 offset: d.offset,
+                jumpType: d.jumpType,
+                jumpInstruction: d.jumpInstruction,
                 taken: d.taken,
                 nottaken: d.nottaken
             }; // since d1 == d2
@@ -341,6 +347,8 @@ function Reduce(d) {
     var asBBStruct = {
         module : dz.value.address.module,
         offset : dz.value.address.offset,
+        jumpType : dz.value.address.jumpType,
+        jumpInstruction : dz.value.address.jumpInstruction,
         next : [
             dz.value.address.taken,
             dz.value.address.nottaken

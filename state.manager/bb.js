@@ -116,6 +116,8 @@ function UpdateBB(bb, delta) {
     var asBBStruct = {
         module : bb.value.address.module,
         offset : bb.value.address.offset,
+        jumpType : bb.value.address.jumpType,
+        jumpInstruction : bb.value.address.jumpInstruction,
         next : [
             bb.value.address.taken,
             bb.value.address.nottaken

@@ -19,6 +19,8 @@ function Reduce(d) {
                 var ret = {
                     module: bb.module,
                     offset: bb.offset,
+                    jumpType: bb.jumpType,
+                    jumpInstruction: bb.jumpInstruction,
                     taken: bb.next[0],
                     nottaken: bb.next[1]
                 };
@@ -34,6 +36,8 @@ function Reduce(d) {
 				return {
 					module: d.module,
 					offset: d.offset,
+					jumpType: d.jumpType,
+					jumpInstruction: d.jumpInstruction,
 					taken: d.taken,
 					nottaken: d.nottaken
 				};
@@ -76,6 +80,8 @@ function Reduce(d) {
     var asBBStruct = {
         module : dz.address.module,
         offset : dz.address.offset,
+        jumpType : dz.address.jumpType,
+        jumpInstruction : dz.address.jumpInstruction,
         next : [
             dz.address.taken,
             dz.address.nottaken
