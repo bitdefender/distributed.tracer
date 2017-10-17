@@ -1,0 +1,23 @@
+{
+  "name": "tracer.node",
+  "version": "0.0.1",
+  "description": "River tracing client.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Teodor Stoenescu <tstoenescu@bitdefender.com>",
+  "license": "ISC",
+  "dependencies": {
+    "amqplib": "^0.5.1",
+    "async": "^2.1.5",
+    "binary": "^0.3.0",
+    "bl": "^1.1.2",
+    "co": "^4.6.0",
+    "dissolve": "^0.3.3",
+    "distributed-common": "file:../distributed-common",
+    "mongodb": "^2.2.16",
+    "node-river": "file:./deps/node-river",
+    "state.manager": "file:../state.manager"
+  }
+}
