@@ -25,9 +25,6 @@ function Reduce(d) {
                     nottaken: bb.next[1]
                 };
 
-                // set ids for future comparisons
-                ret.taken._id = Id(ret.taken.module, ret.taken.offset);
-                ret.nottaken._id = Id(ret.nottaken.module, ret.nottaken.offset);
                 return ret;
 			},
 
