@@ -13,6 +13,18 @@ router.get('/:_id', getGraph);
 
 module.exports = router;
 
+const  RIVER_INSTR_RET = 0x00
+const  RIVER_INSTR_JMP = 0x01
+const  RIVER_INSTR_JXX = 0x02
+const  RIVER_INSTR_CALL = 0x03
+const  RIVER_INSTR_SYSCALL = 0x04
+
+const  RIVER_OPTYPE_NONE = 0x00
+const  RIVER_OPTYPE_IMM = 0x04
+const  RIVER_OPTYPE_REG = 0x08
+const  RIVER_OPTYPE_MEM = 0x0C
+const  RIVER_OPTYPE_ALL = 0x10
+
 
 function getGraph(req, res) {
     graphService.getAll(req.params._id)
@@ -111,13 +123,21 @@ function getGraph(req, res) {
                             var nextId = e;
                             var color = 0;
 
-                            if (nodes[n].value.address.taken !== null) {
-                                var takenId = nodes[n].value.address.taken._id;
-                                var notTakenId = nodes[n].value.address.nottaken._id;
-                                if (nextId == takenId) {
-                                      color = "#008000";
-                                } else if (nextId == notTakenId) {
-                                      color = "#FF0000";
+                            if (nodes[n].value.address.jumpType == RIVER_OPTYPE_REG ||
+                                nodes[n].value.address.jumpInstruction == RIVER_OPTYPE_NONE) {
+                                    color = 0;
+                            } else if (nodes[n].value.address.taken !== null) {
+                                if (nodes[n].value.address.jumpInstruction == RIVER_INSTR_JMP ||
+                                    nodes[n].value.address.jumpInstruction == RIVER_INSTR_CALL) {
+                                        color = "#0000FF";
+                                } else if (nodes[n].value.address.jumpInstruction == RIVER_INSTR_JXX) {
+                                    var takenId = nodes[n].value.address.taken._id;
+                                    var notTakenId = nodes[n].value.address.nottaken._id;
+                                    if (nextId == takenId) {
+                                        color = "#008000";
+                                    } else if (nextId == notTakenId) {
+                                        color = "#FF0000";
+                                    }
                                 }
                             }
 
