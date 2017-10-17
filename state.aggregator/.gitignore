@@ -1,3 +1,6 @@
+# Cardinal config files
+config.json
+
 # Windows binaries
 *.dll
 *.exe
