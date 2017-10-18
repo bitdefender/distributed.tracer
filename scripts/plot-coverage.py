@@ -101,6 +101,9 @@ def generate_graph(baseline, cardinal):
     df.plot(kind='barh', color=['green', 'red', 'magenta', 'cyan', 'yellow',
         'black', 'gray', 'pink', 'blue', 'crimson', 'violet', 'lightgreen'])
     plt.axvline(x=1.0)
+    plt.xlabel("Coverage")
+    plt.title("Normalized Coverage by Cardinal")
+    plt.legend(title="Runs", bbox_to_anchor=(1.1, 1.065))
     plt.show()
 
 def get_baseline_results(names):
