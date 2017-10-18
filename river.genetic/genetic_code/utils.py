@@ -11,7 +11,6 @@ import subprocess
 import struct
 import hashlib
 from collections import namedtuple
-from parse import *
 from pyspark import SparkConf, SparkContext
 import json
 import pika
@@ -183,15 +182,6 @@ def getFolderPathFromId(ithFolder):
 def getResultsPath():
     #return os.path.join(logsFullPath, "results")
     return logsFullPath
-
-def getBlockOffsetEntryFromLine(line):
-    if len(line.split()) != 5:
-        return None,None # assert ?
-    wordsOnLine = parse("{module} + {offset:x} ({cost:^d})", line)
-
-    modulePath = wordsOnLine["module"]
-    moduleName = modulePath[modulePath.rfind('/')+1 : ]; # using only the name for name as an optimization for string searches. Could make a map between full and name in the end if someone needs the full path
-    return moduleName, int(wordsOnLine["offset"], 10)
 
 def sha1Sum(contentBuffer):
     m = hashlib.sha1()

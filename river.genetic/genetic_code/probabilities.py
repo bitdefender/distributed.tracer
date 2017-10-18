@@ -8,8 +8,6 @@ import os
 import utils
 import struct
 
-from parse import *
-
 #Persistent data - stores data from all test folder discovered until now
 # Deltas are uploaded in updateNewGeneration function
 #-----------------------------------------------------------------------------------
