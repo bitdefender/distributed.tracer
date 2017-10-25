@@ -25,6 +25,27 @@ function infolog(msg) {
   console.log("[PM][INFO] " + msg);
 }
 
+// Fixes bash-like environment data that use ${<ENV>} to specify
+// process environment variables
+function fixenv(env) {
+  if (typeof env != "string")
+    return env;
+
+  var regex=/\$\{([A-Za-z\_]+)\}/;
+  fixed = "";
+  while (true) {
+    var res = env.match(regex);
+    if (res == null)
+      break;
+
+    var localenv = process.env[res[1]];
+    fixed = fixed + env.substring(0, res.index) + localenv;
+    env = env.substring(res.index + res[0].length, env.length);
+  }
+
+  return fixed + env;
+}
+
 function UpdateResources(cb) {
   /*for (var i in processes) {
     console.log(i);
@@ -149,7 +170,11 @@ function CreateProcesses(processName, execId, processArgs, count, cb) {
       var arg = cfg.env["SIMPLETRACERLOGSPATH"];
       cfg.env["SIMPLETRACERLOGSPATH"] = util.format(arg, cfg.cwd, execId);
     }
-    //console.dir(cfg.env);
+
+    for (k in cfg.env) {
+      cfg.env[k] = fixenv(cfg.env[k]);
+    }
+
   }
 
   if ("autorestart" in processes[processName]) {

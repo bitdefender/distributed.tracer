@@ -8,7 +8,7 @@
             "../config.json"
         ],
         "env": {
-            "LD_LIBRARY_PATH": "./node_modules/node-river/serial.tracer/river.sdk/lin/lib/:/data/distributed.tracer/tracer.node/deps/node-river/serial.tracer/build-river-tools/lib"
+            "LD_LIBRARY_PATH": "${RIVER_SDK_DIR}/lin/lib/:${SIMPLETRACER_ROOT_PATH}/build-river-tools/lib"
         }
     },
     "state.aggregator": {
@@ -80,10 +80,10 @@
             "%s"
         ],
         "env": {
-            "SPARK_HOME": "/data/spark/spark-2.0.1-bin-hadoop2.7",
+            "SPARK_HOME": "${SPARK_HOME}",
             "PYSPARK_PYTHON": "python3",
             "PYSPARK_DRIVER_PYTHON": "python3",
-            "PYTHONPATH": "/data/spark/spark-2.0.1-bin-hadoop2.7/python:/data/spark/spark-2.0.1-bin-hadoop2.7/python/lib/py4j-0.10.3-src.zip",
+            "PYTHONPATH": "${PYTHONPATH}",
             "JAVA_HOME": "/usr/lib/jvm/java-1.8.0-openjdk-amd64",
             "SPARK_WORKER_DIR": "/data/spark_worker_dir",
             "SPARK_EXECUTOR_INSTANCES": 2,
@@ -91,8 +91,8 @@
             "SPARK_LOCAL_IP": "10.18.0.32",
             "PYTHONUNBUFFERED": 1,
             "SIMPLETRACERLOGSPATH": "%s/../%s/results",
-            "SIMPLETRACERPATH":"/data/distributed.tracer/tracer.node/deps/node-river/serial.tracer/build-river-tools/bin/river.tracer",
-            "LD_LIBRARY_PATH": "/data/distributed.tracer/tracer.node/deps/node-river/serial.tracer/build-river-tools/lib:/data/distributed.tracer/tracer.node/deps/node-river/serial.tracer/river.sdk/lin/lib"
+            "SIMPLETRACERPATH":"${SIMPLETRACER_ROOT_PATH}/build-river-tools/bin/river.tracer",
+            "LD_LIBRARY_PATH": "${SIMPLETRACER_ROOT_PATH}/build-river-tools/lib:${RIVER_SDK_DIR}/lin/lib"
         }
     }
 }
