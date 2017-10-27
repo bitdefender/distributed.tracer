@@ -140,9 +140,9 @@ def readParams():
     entryType_InputUsage            = 0x00AA
     entryType_NextOffset            = 0x00A0
     EntryTemplate                   = namedtuple("t", "hF hS oF oS TN TM TO TIU TNM TNO") # header format, header size, offset format, offset size
-    headerFtm                       = 'h h'
-    offsetFtm                       = 'I h h h'
-    Params.entryTemplate            = EntryTemplate(hF = headerFtm, hS = struct.calcsize(headerFtm), oF = offsetFtm, oS = struct.calcsize(offsetFtm),
+    headerFmt                       = 'h h'
+    offsetFmt                       = 'I h h h h'
+    Params.entryTemplate            = EntryTemplate(hF = headerFmt, hS = struct.calcsize(headerFmt), oF = offsetFmt, oS = struct.calcsize(offsetFmt),
                                                     TN = entryType_TestName, TM = entryType_Module, TO = entryType_Offset, TIU = entryType_InputUsage,
                                                     TNO = entryType_NextOffset, TNM = entryType_NextModule)
 
@@ -231,13 +231,13 @@ def createTracerProcess(cmd, payloadSize):
     return p
 
 def getNextEntryFromStream(dataStream, streamPos, entryTemplate):
-    headerFtm = entryTemplate.hF
+    headerFmt = entryTemplate.hF
     headerSize = entryTemplate.hS
     offsetInfoFmt = entryTemplate.oF
     offsetInfoSize = entryTemplate.oS
     ## sizeof(I h h h) is 10 but it is aligned to 4bytes
 
-    headerRes = struct.unpack_from(headerFtm, dataStream, streamPos)
+    headerRes = struct.unpack_from(headerFmt, dataStream, streamPos)
     streamPos += headerSize
 
     type = headerRes[0]
@@ -248,6 +248,7 @@ def getNextEntryFromStream(dataStream, streamPos, entryTemplate):
     cost = 0
     jumpType = 0
     jumpInstruction = 0
+    nInstructions = 0
     nextoffset = 0
     nextModule = ''
 
@@ -267,6 +268,7 @@ def getNextEntryFromStream(dataStream, streamPos, entryTemplate):
         cost            = offsetInfoRes[1]
         jumpType        = offsetInfoRes[2]
         jumpInstruction = offsetInfoRes[3]
+        nInstructions   = offsetInfoRes[4]
 
         entrySize = headerSize + length
         streamPos += length ## offsetInfoSize == 10 != 12 (alignment issue)
@@ -282,7 +284,8 @@ def getNextEntryFromStream(dataStream, streamPos, entryTemplate):
 
 
     return (type, length, nameString, offset, cost, jumpType,
-            jumpInstruction, entrySize, nextModule, nextoffset)
+            jumpInstruction, nInstructions, entrySize, nextModule,
+            nextoffset)
 
 
 class ParamsType:

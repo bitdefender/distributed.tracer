@@ -59,7 +59,8 @@ def analyzeTrace(streamData, streamSize, entryTemplate):
         cost            = entry[4]
         jumpType        = entry[5]
         jumpInstruction = entry[6]
-        entrySize       = entry[7]
+        nInstructions   = entry[7]
+        entrySize       = entry[8]
 
         streamPos += entrySize
 

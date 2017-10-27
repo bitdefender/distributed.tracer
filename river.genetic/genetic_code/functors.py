@@ -54,9 +54,10 @@ class EvalFunctors:
             cost            = entry[4]
             jumpType        = entry[5]
             jumpInstruction = entry[6]
-            entrySize       = entry[7]
-            nextModule      = entry[8]
-            nextoffset      = entry[9]
+            nInstructions   = entry[7]
+            entrySize       = entry[8]
+            nextModule      = entry[9]
+            nextoffset      = entry[10]
 
             streamPos += entrySize
 
