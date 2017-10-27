@@ -7,6 +7,8 @@ const fs = require('fs');
 var common = require('distributed-common');
 common.Init();
 
+const stateManager = require("state.manager");
+
 var db = mongo.db(common.mongo.GetUrl(), { native_parser: true });
 
 var service = {};
@@ -24,7 +26,8 @@ function getStats(id) {
         traced: 0,
         passed: 0,
         failed: 0,
-        errored: 0
+        errored: 0,
+        coverage: 0
     };
 
     // compute .failed by counting the number of crash-files
@@ -76,7 +79,11 @@ function getStats(id) {
                         return;
                     }
                     ret.errored = count;
-                    deferred.resolve(ret);
+                    var st = new stateManager.StateQuery(id);
+                    st.GetCoverage().then((coverage) => {
+                      ret.coverage = coverage;
+                      deferred.resolve(ret);
+                    });
                 });
             });
         });
