@@ -88,7 +88,9 @@ function getGraph(req, res) {
 
 
                 for (var n in nodes) {
-                    var label = nodes[n].value.address.module + ":" + nodes[n].value.address.offset.toString(16);
+                    var label = nodes[n].value.address.module + ":" +
+                    nodes[n].value.address.offset.toString(16) +
+                    " (" + nodes[n].value.address.nInstructions + ")";
                     if (nodes[n]._id == "<begin>") {
                         label = "<begin>";
 
