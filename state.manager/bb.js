@@ -118,6 +118,7 @@ function UpdateBB(bb, delta) {
         offset : bb.value.address.offset,
         jumpType : bb.value.address.jumpType,
         jumpInstruction : bb.value.address.jumpInstruction,
+        nInstructions : bb.value.address.nInstructions,
         next : [
             bb.value.address.taken,
             bb.value.address.nottaken

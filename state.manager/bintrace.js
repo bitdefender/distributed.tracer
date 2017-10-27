@@ -33,13 +33,15 @@ function* ParseBinTrace(trace) {
 			var off = bin.readInt32LE(offset);
 			var cost = bin.readInt16LE(offset + 4);
 			var jumpType = bin.readInt16LE(offset + 6);
-			var jumpInstruction =bin.readInt16LE(offset + 8);
+			var jumpInstruction = bin.readInt16LE(offset + 8);
+			var nInstructions = bin.readInt16LE(offset + 10);
 
 			it = { module : lastModule,
 				offset : off,
 				cost : cost,
 				jumpType : jumpType,
 				jumpInstruction : jumpInstruction,
+				nInstructions : nInstructions,
 				next : []
 			};
 		} else if (ENTRY_TYPE_BB_OFFSET_NEXT_OFFSET == entryType) {

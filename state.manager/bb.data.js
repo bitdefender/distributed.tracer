@@ -206,6 +206,7 @@ const bbPlugins = {
                 offset: bb.offset,
                 jumpType: bb.jumpType,
                 jumpInstruction: bb.jumpInstruction,
+                nInstructions: bb.nInstructions,
                 taken: bb.next[0],
                 nottaken: bb.next[1]
             };
@@ -234,6 +235,7 @@ const bbPlugins = {
                 offset: prev.offset,
                 jumpType: prev.jumpType,
                 jumpInstruction: prev.jumpInstruction,
+                nInstructions: prev.nInstructions,
                 taken: prev.next[0],
                 nottaken: prev.next[1]
 
@@ -247,6 +249,7 @@ const bbPlugins = {
                 offset: d.offset,
                 jumpType: d.jumpType,
                 jumpInstruction: d.jumpInstruction,
+                nInstructions: d.nInstructions,
                 taken: d.taken,
                 nottaken: d.nottaken
             }; // since d1 == d2
@@ -349,6 +352,7 @@ function Reduce(d) {
         offset : dz.value.address.offset,
         jumpType : dz.value.address.jumpType,
         jumpInstruction : dz.value.address.jumpInstruction,
+        nInstructions : dz.value.address.nInstructions,
         next : [
             dz.value.address.taken,
             dz.value.address.nottaken
