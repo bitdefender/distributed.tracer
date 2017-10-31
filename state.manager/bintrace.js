@@ -20,6 +20,7 @@ function* ParseBinTrace(trace) {
     var testName = "";
     var it = {};
 
+    var timestamp = new Date().getTime();
     while (offset < bin.length) {
 		var entryType = bin.readInt16LE(offset);
         var entryLength = bin.readInt16LE(offset + 2);
@@ -45,8 +46,14 @@ function* ParseBinTrace(trace) {
 				jumpInstruction : jumpInstruction,
 				nInstructions : nInstructions,
 				next : [],
-				firstTest : testName,
-				lastTest : testName
+				firstTest : {
+					testname : testName,
+					timestamp : timestamp
+				},
+				lastTest : {
+					testname : testName,
+					timestamp : timestamp
+				}
 			};
 		} else if (ENTRY_TYPE_BB_OFFSET_NEXT_OFFSET == entryType) {
 			var off = bin.readInt32LE(offset);
