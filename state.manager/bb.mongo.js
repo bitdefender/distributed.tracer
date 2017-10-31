@@ -23,7 +23,9 @@ function Reduce(d) {
                     jumpInstruction: bb.jumpInstruction,
                     nInstructions: bb.nInstructions,
                     taken: bb.next[0],
-                    nottaken: bb.next[1]
+                    nottaken: bb.next[1],
+                    firstTest: bb.firstTest,
+                    lastTest: bb.lastTest
                 };
 
                 return ret;
@@ -36,9 +38,11 @@ function Reduce(d) {
 					offset: d.offset,
 					jumpType: d.jumpType,
 					jumpInstruction: d.jumpInstruction,
-          nInstructions: d.nInstructions,
+					nInstructions: d.nInstructions,
 					taken: d.taken,
-					nottaken: d.nottaken
+					nottaken: d.nottaken,
+					firstTest: d.firstTest,
+					lastTest: d.lastTest
 				};
             }
         },
@@ -85,7 +89,9 @@ function Reduce(d) {
         next : [
             dz.address.taken,
             dz.address.nottaken
-        ]
+        ],
+        firstTest : dz.address.firstTest,
+        lastTest : dz.address.lastTest
     };
     for (var p in bbPlugins) {
         ret[p] = bbPlugins[p].zero(asBBStruct);

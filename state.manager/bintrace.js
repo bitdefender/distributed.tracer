@@ -15,9 +15,10 @@ function* ParseBinTrace(trace) {
     }
 
     var offset = 0;
-	var lastModule = "";
-	var lastNextModule = "";
-	var it = {};
+    var lastModule = "";
+    var lastNextModule = "";
+    var testName = "";
+    var it = {};
 
     while (offset < bin.length) {
 		var entryType = bin.readInt16LE(offset);
@@ -25,6 +26,7 @@ function* ParseBinTrace(trace) {
 		offset += 4;
 
 		if (ENTRY_TYPE_TEST_NAME == entryType) {
+			testName = bin.toString('ascii', offset, offset + entryLength - 1);
 		} else if (ENTRY_TYPE_BB_NEXT_MODULE == entryType) {
 			lastNextModule = bin.toString('ascii', offset, offset + entryLength - 1);
 		} else if (ENTRY_TYPE_BB_MODULE == entryType) {
@@ -42,7 +44,9 @@ function* ParseBinTrace(trace) {
 				jumpType : jumpType,
 				jumpInstruction : jumpInstruction,
 				nInstructions : nInstructions,
-				next : []
+				next : [],
+				firstTest : testName,
+				lastTest : testName
 			};
 		} else if (ENTRY_TYPE_BB_OFFSET_NEXT_OFFSET == entryType) {
 			var off = bin.readInt32LE(offset);

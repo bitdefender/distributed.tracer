@@ -208,7 +208,9 @@ const bbPlugins = {
                 jumpInstruction: bb.jumpInstruction,
                 nInstructions: bb.nInstructions,
                 taken: bb.next[0],
-                nottaken: bb.next[1]
+                nottaken: bb.next[1],
+                firstTest : bb.firstTest,
+                lastTest : bb.lastTest
             };
 
             // set ids for future comparisons
@@ -237,7 +239,9 @@ const bbPlugins = {
                 jumpInstruction: prev.jumpInstruction,
                 nInstructions: prev.nInstructions,
                 taken: prev.next[0],
-                nottaken: prev.next[1]
+                nottaken: prev.next[1],
+                firstTest: prev.firstTest,
+                lastTest: prev.lastTest
 
             };
         },
@@ -251,7 +255,9 @@ const bbPlugins = {
                 jumpInstruction: d.jumpInstruction,
                 nInstructions: d.nInstructions,
                 taken: d.taken,
-                nottaken: d.nottaken
+                nottaken: d.nottaken,
+                firstTest: d.firstTest,
+                lastTest: d.lastTest
             }; // since d1 == d2
         }
     },
@@ -356,7 +362,9 @@ function Reduce(d) {
         next : [
             dz.value.address.taken,
             dz.value.address.nottaken
-        ]
+        ],
+        firstTest : dz.value.address.firstTest,
+        lastTest : dz.value.address.lastTest
     };
     for (var p in bbPlugins) {
         ret[p] = bbPlugins[p].zero(asBBStruct);

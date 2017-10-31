@@ -122,7 +122,9 @@ function UpdateBB(bb, delta) {
         next : [
             bb.value.address.taken,
             bb.value.address.nottaken
-        ]
+        ],
+        firstTest : bb.value.address.firstTest,
+        lastTest : bb.value.address.lastTest
     };
     var oldBB = localCache[bb._id] || bbdata.Zero(asBBStruct);
 
