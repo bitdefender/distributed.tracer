@@ -33,7 +33,7 @@ function Reduce(d) {
 
             reduce: function(d1, d2) {
 				var d = ("undefined" !== typeof(d1)) ? d1 : d2;
-				return {
+				var ret = {
 					module: d.module,
 					offset: d.offset,
 					jumpType: d.jumpType,
@@ -41,9 +41,15 @@ function Reduce(d) {
 					nInstructions: d.nInstructions,
 					taken: d.taken,
 					nottaken: d.nottaken,
-					firstTest: d.firstTest,
-					lastTest: d.lastTest
+					firstTest : d.firstTest,
+					lastTest : d.lastTest
 				};
+
+				if (ret.module != "<begin>") {
+					ret.firstTest = (d1.firstTest.timestamp < d2.firstTest.timestamp) ? d1.firstTest : d2.firstTest;
+					ret.lastTest = (d1.lastTest.timestamp > d2.lastTest.timestamp) ? d1.lastTest : d2.lastTest;
+				}
+				return ret;
             }
         },
         global: {
