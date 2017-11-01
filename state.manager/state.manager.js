@@ -349,10 +349,41 @@ function DeleteToc(execId) {
     return deferred.promise;
 }
 
+function GetAllTests(coll) {
+	var deferred = Q.defer();
+	coll.global.distinct("value.address.firstTest.testname", (err, firstTests) => {
+		if (err) {
+			deferred.reject(err);
+			return;
+		}
+		coll.global.distinct("value.address.lastTest.testname", {}, (err, lastTests) => {
+			if (err) {
+				deferred.reject(err);
+				return;
+			}
+			var tests = [];
+			tests.push(firstTests);
+			tests.push(lastTests);
+			console.dir(tests);
+			deferred.resolve(tests);
+		});
+	});
+	return deferred.promise;
+}
+
 function GetInterestingTests(prev, next) {
 	var deferred = Q.defer();
-	console.log(prev + " : " + next);
-	deferred.resolve(true);
+	var prevcoll = GetGlobalCollection(prev);
+	var nextcoll = GetGlobalCollection(next);
+
+	GetAllTests(prevcoll).then((prevtests) => {
+		GetAllTests(nextcoll).then((nexttests) => {
+			var interesting = nexttests.filter((x) => {
+				return prevtests.indexOf(x) < 0;
+			});
+			deferred.resolve(interesting);
+		});
+	});
 	return deferred.promise;
 }
 
