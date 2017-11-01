@@ -44,7 +44,12 @@ switch (verb) {
 			process.exit(0);
 		});
 		break;
-
+	case "debug":
+		console.log("Debugging ShrinkCoverageInfo");
+		sq.Debug().then((res) => {
+			process.exit(0);
+		});
+		break;
     default :
         console.log("Usage: node index.js {options} executable_id [purge|clean|coverage]\n");
         return;

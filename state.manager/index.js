@@ -148,6 +148,20 @@ StateQuery.prototype.GetCoverage = function() {
 	return deferred.promise;
 }
 
+StateQuery.prototype.Debug = function() {
+	var deferred = Q.defer();
+	var _this = this;
+
+	this.lastReady.then(() => {
+		state.ShrinkCoverageInfo(_this.execId).then((res) => {
+			deferred.resolve(true);
+		});
+	});
+
+	this.lastReady = deferred.promise;
+	return deferred.promise;
+}
+
 function StateCleaner(execId) {
     this.execId = execId;
     this.lastReady = state.Initialize();

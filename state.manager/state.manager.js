@@ -349,6 +349,51 @@ function DeleteToc(execId) {
     return deferred.promise;
 }
 
+function GetInterestingTests(prev, next) {
+	var deferred = Q.defer();
+	console.log(prev + " : " + next);
+	deferred.resolve(true);
+	return deferred.promise;
+}
+
+function ShrinkCoverageInfo(execId) {
+	var deferred = Q.defer();
+	const tocName = common.mongo.GetStateTocCollection(execId);
+
+	// sort global states in toc by createdTs
+	db.collection(tocName).find({type:"global"},
+		{sort:{createdTs : 1}}).toArray((err, globals) => {
+			if (err) {
+				deferred.reject(false);
+				return;
+			}
+			var prevGlobalDoc = null;
+			var qret = Q(true);
+
+			var x = (idx) => {
+				return () => {
+					var doc = globals[idx];
+					if (prevGlobalDoc != null) {
+						if (prevGlobalDoc.master == false) {
+							GetInterestingTests(prevGlobalDoc.name, doc.name);
+							prevGlobalDoc = doc;
+						}
+					} else {
+						prevGlobalDoc = doc;
+					}
+				};
+			};
+
+			for (var i in globals) {
+				qret = qret.then(x(i));
+			}
+			qret.then(() => {
+				deferred.resolve(true);
+			});
+		})
+	return deferred.promise;
+}
+
 function GenerateNewGlobal(execId) {
 	var deferred = Q.defer();
 
@@ -427,7 +472,8 @@ function GenerateNewGlobal(execId) {
 							execId: execId,
 							master: true,
 							refCnt: 0,
-							createdTs: cTime
+							createdTs: cTime,
+							parent: global
 						};
 
 						return toc.insert(
@@ -442,10 +488,9 @@ function GenerateNewGlobal(execId) {
 								master: false
 							}
 						}, function () {
-							ReleaseGlobalCollection(execId, global)
-							.then(function () {
-								deferred.resolve(true);
-							});
+							// parent global is not released here because it is
+							// referenced by its child
+							deferred.resolve(true);
 						});
 					});
 				});
@@ -531,3 +576,4 @@ module.exports.GetAllCollectionsLow = GetAllCollectionsLow;
 module.exports.RemoveCollection = RemoveCollection;
 module.exports.DeleteCollection = DeleteCollection;
 module.exports.DeleteToc = DeleteToc;
+module.exports.ShrinkCoverageInfo = ShrinkCoverageInfo;
