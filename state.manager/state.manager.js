@@ -153,12 +153,8 @@ function ReleaseGlobalCollection(execId, collId) {
 		}
 	).then(function(ret) {
 		if ((0 >= ret.value.refCnt) && (!ret.value.master)) {
-			db.collection(ret.value.name).drop(function(err, reply) {
-				toc.remove({
-					_id: collHash
-				}, function(err, reply) {
-					deferred.resolve(true);
-				});
+			RemoveCollectionByName(execId, ret.value.name).then(() => {
+				deferred.resolve(true);
 			});
 		} else {
 			deferred.resolve(true);
@@ -306,15 +302,15 @@ function GetAllCollectionsLow(execId) {
     return deferred.promise;
 }
 
-function RemoveCollection(execId, collection) {
+function RemoveCollectionByName(execId, name) {
     const collName = common.mongo.GetStateTocCollection(execId);
 	var deferred = Q.defer();
     
 	var toc = db.collection(collName);
-    db.collection(collection).drop(
+    db.collection(name).drop(
         function(err, reply) {
             toc.remove({
-                name: collection
+                name: name
             }, function(err, reply) {
                 deferred.resolve(true);
             });
@@ -324,10 +320,10 @@ function RemoveCollection(execId, collection) {
     return deferred.promise;
 }
 
-function DeleteCollection(execId, collection) {
+function DeleteCollectionByName(execId, name) {
 	var deferred = Q.defer();
     
-    db.collection(collection).drop(
+    db.collection(name).drop(
         function(err, reply) {
             deferred.resolve(true);
         }
@@ -351,12 +347,12 @@ function DeleteToc(execId) {
 
 function GetAllTests(coll) {
 	var deferred = Q.defer();
-	coll.global.distinct("value.address.firstTest.testname", (err, firstTests) => {
+	coll.global.distinct("value.address.lastTest.testname", (err, firstTests) => {
 		if (err) {
 			deferred.reject(err);
 			return;
 		}
-		coll.global.distinct("value.address.lastTest.testname", {}, (err, lastTests) => {
+		coll.global.distinct("value.address.lastTest.testname", (err, lastTests) => {
 			if (err) {
 				deferred.reject(err);
 				return;
@@ -446,7 +442,7 @@ function GenerateNewGlobal(execId) {
 					var processCol = function(c) {
 						return function() {
 							var dfrd = Q.defer();
-                            
+
 							db.collection(c.name).mapReduce(
 								function() {
 									emit(this._id, this.value); 
@@ -474,16 +470,9 @@ function GenerateNewGlobal(execId) {
 
 									//console.dir(collection);
 									//console.dir(stats);
-
-									db.collection(c.name).drop(
-										function(err, reply) {
-											toc.remove({
-												_id: c._id
-											}, function(err, reply) {
-												dfrd.resolve(true);
-											});
-										}
-									);
+									RemoveCollectionByName(execId, c.name).then(() => {
+										dfrd.resolve(true);
+									});
 								}
 							);
 
@@ -604,7 +593,7 @@ module.exports.GenerateNewGlobal = GenerateNewGlobal;
 
 module.exports.GetAllCollections = GetAllCollections;
 module.exports.GetAllCollectionsLow = GetAllCollectionsLow;
-module.exports.RemoveCollection = RemoveCollection;
-module.exports.DeleteCollection = DeleteCollection;
+module.exports.RemoveCollectionByName = RemoveCollectionByName;
+module.exports.DeleteCollectionByName = DeleteCollectionByName;
 module.exports.DeleteToc = DeleteToc;
 module.exports.ShrinkCoverageInfo = ShrinkCoverageInfo;

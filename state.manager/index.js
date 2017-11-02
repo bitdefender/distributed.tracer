@@ -195,10 +195,10 @@ StateCleaner.prototype.CleanCollections = function(options) {
         if ("none" != options.state) {
             if ("full" == options.state) {
                 qret = state.GetAllCollectionsLow(_this.execId);
-                rc = state.DeleteCollection.bind(state);
+                rc = state.DeleteCollectionByName.bind(state);
             } else if ("normal" == options.state) {
                 qret = state.GetAllCollections(_this.execId);
-                rc = state.RemoveCollection.bind(state);
+                rc = state.RemoveCollectionByName.bind(state);
             }
 
             qret = qret.then(
@@ -234,7 +234,7 @@ StateCleaner.prototype.CleanCollections = function(options) {
         console.dir(eList);
         for (var i in eList) {
             qret = qret.then(
-                delFunc(eList[i], state.DeleteCollection.bind(state))()
+                delFunc(eList[i], state.DeleteCollectionByName.bind(state))()
             );
         }
 
