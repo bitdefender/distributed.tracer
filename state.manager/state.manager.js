@@ -357,9 +357,8 @@ function GetAllTests(coll) {
 				deferred.reject(err);
 				return;
 			}
-			var tests = [];
-			tests.push(firstTests);
-			tests.push(lastTests);
+			var tests = firstTests;
+			tests = tests.concat(lastTests);
 			deferred.resolve(tests);
 		});
 	});
@@ -372,6 +371,7 @@ function GetInterestingTests(prev, next) {
 	var prevcoll = GetGlobalCollection(prev);
 	var nextcoll = GetGlobalCollection(next);
 
+	console.log("Finding interesting G0: " + prev + " G1: " + next);
 	GetAllTests(prevcoll).then((prevtests) => {
 		GetAllTests(nextcoll).then((nexttests) => {
 			var interesting = nexttests.filter((x) => {
