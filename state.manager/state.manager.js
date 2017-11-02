@@ -360,10 +360,10 @@ function GetAllTests(coll) {
 			var tests = [];
 			tests.push(firstTests);
 			tests.push(lastTests);
-			console.dir(tests);
 			deferred.resolve(tests);
 		});
 	});
+
 	return deferred.promise;
 }
 
@@ -402,12 +402,27 @@ function ShrinkCoverageInfo(execId) {
 					var doc = globals[idx];
 					if (prevGlobalDoc != null) {
 						if (prevGlobalDoc.master == false) {
-							GetInterestingTests(prevGlobalDoc.name, doc.name);
+							var prom = GetInterestingTests(prevGlobalDoc.name, doc.name).then((interesting) => {
+								var uret = Q(true);
+								var update = (iidx) => {
+									return db.collection("tests_" + execId).update(
+										{_id : interesting[iidx]},
+										{$set : {
+											interesting : true
+										}});
+								};
+								for (var i in interesting) {
+									uret = uret.then(update(i));
+								}
+								return uret;
+							});
 							prevGlobalDoc = doc;
+							return prom;
 						}
 					} else {
 						prevGlobalDoc = doc;
 					}
+					return Q(true);
 				};
 			};
 
@@ -468,8 +483,6 @@ function GenerateNewGlobal(execId) {
 										console.log(err);
 									}
 
-									//console.dir(collection);
-									//console.dir(stats);
 									RemoveCollectionByName(execId, c.name).then(() => {
 										dfrd.resolve(true);
 									});

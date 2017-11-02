@@ -8,6 +8,11 @@ const state = require("./state.manager.js");
 
 const Q = require("q");
 
+process.on( 'unhandledRejection', ( error, promise ) => {
+     console.log( 'UPR: ' + promise + ' with ' + error )
+     console.log( error.stack )
+} );
+
 function StateAggregator(execId) {
     this.execId = execId;
     this.lastReady = state.Initialize(); //Q(true); //state.AcquireLocalCollection(execId);
