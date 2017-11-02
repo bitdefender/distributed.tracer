@@ -366,7 +366,8 @@ function GetAllTests(coll) {
 	return deferred.promise;
 }
 
-function GetInterestingTests(prev, next) {
+//returns a dict of {interesting : [], notinteresting:[]}
+function GetInterestingTests(execId, prev, next) {
 	var deferred = Q.defer();
 	var prevcoll = GetGlobalCollection(prev);
 	var nextcoll = GetGlobalCollection(next);
@@ -374,10 +375,20 @@ function GetInterestingTests(prev, next) {
 	console.log("Finding interesting G0: " + prev + " G1: " + next);
 	GetAllTests(prevcoll).then((prevtests) => {
 		GetAllTests(nextcoll).then((nexttests) => {
+			//g1 - g0
 			var interesting = nexttests.filter((x) => {
 				return prevtests.indexOf(x) < 0;
 			});
-			deferred.resolve(interesting);
+			//g0 - g1
+			var notinteresting = prevtests.filter((x) => {
+				return nexttests.indexOf(x) < 0;
+			});
+
+			ReleaseGlobalCollection(execId, prev).then((res) => {
+				deferred.resolve({"interesting" : interesting,
+					"notinteresting" : notinteresting
+				});
+			});
 		});
 	});
 	return deferred.promise;
@@ -402,17 +413,21 @@ function ShrinkCoverageInfo(execId) {
 					var doc = globals[idx];
 					if (prevGlobalDoc != null) {
 						if (prevGlobalDoc.master == false) {
-							var prom = GetInterestingTests(prevGlobalDoc.name, doc.name).then((interesting) => {
+							var prom = GetInterestingTests(execId, prevGlobalDoc.name, doc.name).then((res) => {
+								console.log(res);
 								var uret = Q(true);
-								var update = (iidx) => {
+								var update = (elem, isinteresting) => {
 									return db.collection("tests_" + execId).update(
-										{_id : interesting[iidx]},
+										{_id : elem},
 										{$set : {
-											interesting : true
+											interesting : isinteresting
 										}});
 								};
-								for (var i in interesting) {
-									uret = uret.then(update(i));
+								for (var i in res.interesting) {
+									uret = uret.then(update(res.interesting[i], true));
+								}
+								for (var i in res.notinteresting) {
+									uret = uret.then(update(res.notinteresting[i], false));
 								}
 								return uret;
 							});
