@@ -22,6 +22,7 @@ module.exports = service;
 function getStats(id) {
     var deferred = Q.defer();
     var ret = {
+        total: 0,
         corpus: 0,
         traced: 0,
         passed: 0,
@@ -56,7 +57,7 @@ function getStats(id) {
             return;
         }
 
-        ret.corpus = count;
+        ret.total = count;
 
         coll.count({state: "traced"}, function(err, count) {
             if (err) {
@@ -81,8 +82,16 @@ function getStats(id) {
                     ret.errored = count;
                     var st = new stateManager.StateQuery(id);
                     st.GetCoverage().then((coverage) => {
-                      ret.coverage = coverage;
-                      deferred.resolve(ret);
+                        ret.coverage = coverage;
+
+                        coll.count({interesting: true}, function(err, count) {
+                            if (err) {
+                                deferred.reject(err);
+                                return;
+                            }
+                            ret.corpus = count;
+                            deferred.resolve(ret);
+                        });
                     });
                 });
             });
