@@ -347,7 +347,7 @@ function DeleteToc(execId) {
 
 function GetAllTests(coll) {
 	var deferred = Q.defer();
-	coll.global.distinct("value.address.lastTest.testname", (err, firstTests) => {
+	coll.global.distinct("value.address.firstTest.testname", (err, firstTests) => {
 		if (err) {
 			deferred.reject(err);
 			return;
