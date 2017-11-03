@@ -7,6 +7,7 @@
 		"flow" : {
 			"prefix" : "<all_amqp_objects_will_have_this_prefix>",
 			"new" : "<new_queue_name>",
+			"traced" : <traced_queue_name>,
 			"batched" : "<batched_queue_name>"
 		}
 	},
@@ -14,11 +15,22 @@
 	"mongo" : {
 		"host" : "<your_mongo_server_ip_here>",
 		"port" : 27017,
+		"user" : <your_mongo_user>,
+		"password" : "<your_mongo_password>",
+		"authdb" " : "<authorization_database_name>",
 		"database" : "<your_mongo_database_here>",
-		"prefix" : "<your_mongo_collection_prefixes_here>"
+		"prefix" : "<your_mongo_collection_prefixes_here>",
+		"testsPrefix" : <yout_mongo_tests_db_prefixes_here>",
+		"tocPrefix" : "<your_table_of_contents_prefixes_here>",
+		"stateGlobalPrefix" : "<your_global_state_prefixes_here>",
+		"stateLocalPrefix" : "<your_local_state_prefixes_here>",
+		"prefixfs" : "<your_trace_storage_prefixes_here>"
 	},
 
 	"interface" : {
-		"secret" : "<your_interface_secret_here>"
+		"secret" : "<your_interface_secret_here>",
+		"port" : 8443,
+		"publicport" : 443,
+		"httpport" : 8180
 	}
 }
