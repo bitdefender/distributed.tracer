@@ -5,7 +5,7 @@ read rcg_path <<<$@
 
 SCRIPTS_PATH=$rcg_path/river
 WORK_DIR=`pwd`/setup-initial-corpus
-LIBS_SCRIPT_PATH=/data/simpletracer/scripts/libs.sh
+LIBS_SCRIPT_PATH=$SIMPLETRACER_ROOT_PATH/scripts/libs.sh
 
 if [ ! -d $WORK_DIR ]; then
   mkdir $WORK_DIR
