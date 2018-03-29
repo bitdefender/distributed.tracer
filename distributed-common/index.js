@@ -36,6 +36,7 @@ module.exports = exports = {
 				.option('-c, --config [config_file]', 'Configuration file', "config.json")
 				.parse(process.argv);
 		} catch (ex) {
+			console.log(ex);
 		}
 
 		try {
@@ -45,6 +46,7 @@ module.exports = exports = {
 
 			return true;
 		} catch (ex) {
+			console.log(ex);
 			return false;
 		}
 		
@@ -79,6 +81,11 @@ module.exports = exports = {
 			return configuration.rabbit.flow.prefix + "." + 
 				configuration.rabbit.flow.batched + "." +
 				executableId;
+		},
+
+		"GetExecutables" : () => {
+			return configuration.rabbit.flow.prefix + "." +
+				configuration.rabbit.flow.executables;
 		}
 	},
 

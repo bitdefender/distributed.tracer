@@ -1,0 +1,19 @@
+{
+  "name": "executables.handler",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Mihai-Valentin DUMITRU <mdumitru@bitdefender.com>",
+  "license": "ISC",
+  "dependencies": {
+    "amqplib": "^0.5.2",
+    "async": "^2.6.0",
+    "binary": "^0.3.0",
+    "dissolve": "^0.3.3",
+    "mongodb": "^3.0.5",
+    "distributed-common": "file:../distributed-common"
+  }
+}
