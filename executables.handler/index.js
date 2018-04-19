@@ -80,7 +80,6 @@ amqp.connect(rabbit, (err, conn) => {
 		// this will run at least once, passing "undefined" as the last argument
 		// to "FillQueue", ensuring that it is called to enqueue all executables
 		// when no arguments are provided.
-		// TODO test functionality
 		if (process.argv[2] == 'start-services') {
 			const q = common.amqp.GetExecutables();
 			channel.consume(

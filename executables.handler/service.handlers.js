@@ -8,30 +8,31 @@ const services = {
 };
 
 function StartServices(executableId) {
-	for (var key in services) {
-		value = services[key];
-		StartService(key, executableId, value[0], value.slice(1));
-	}
+	var keys  = Object.keys(services);
+	processManager.connect(() => {
+		StartService(keys, 0, executableId, services);
+	});
 }
 
 function StopServices(executableId) {
-	for (var key in services) {
-		value = services[key];
-		StopService(key, executableId);
-	}
+	var keys  = Object.keys(services);
+	processManager.connect(() => {
+		keys.forEach((item, index, array) => {
+			StopService(item, executableId);
+		});
+	});
 }
 
 function StartService(serviceName, executableId, nrInstances, extraArgs) {
-	processManager.connect(() => {
-		if (nrInstances == 0) {
+	if (nrInstances == 0) {
+		return;
+	}
+	processManager.ensureRunning(serviceName, executableId,
+		nrInstances, extraArgs, () => {
+			console.log("INFO: Started " + serviceName);
 			return;
 		}
-		processManager.ensureRunning(serviceName, executableId,
-			nrInstances, extraArgs, () => {
-				console.log("INFO: Started " + serviceName);
-				return;
-			});
-	});
+	);
 }
 
 function CheckExited(serviceName, executableId) {
@@ -50,15 +51,11 @@ function CheckExited(serviceName, executableId) {
 }
 
 function StopService(serviceName, executableId) {
-	processManager.connect(() => {
-		processManager.ensureRunning(serviceName, executableId,
-			0, [], () => {
-				console.log("INFO: Stopped " + serviceName);
-				//CheckExited(serviceName, executableId);
-			});
-	});
+	processManager.ensureRunning(serviceName, executableId,
+		0, [], () => {
+			console.log("INFO: Stopped: " + serviceName + " : " + executableId);
+		});
 }
-
 
 module.exports = exports = {
   "StartServices" : StartServices,
