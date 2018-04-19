@@ -14,6 +14,7 @@
     "binary": "^0.3.0",
     "dissolve": "^0.3.3",
     "mongodb": "^3.0.5",
-    "distributed-common": "file:../distributed-common"
+    "distributed-common": "file:../distributed-common",
+    "process.manager" : "file:../process.manager"
   }
 }
