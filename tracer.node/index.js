@@ -16,6 +16,7 @@ const path = require('path');
 const async = require('async');
 const amqp = require('amqplib/callback_api');
 const stateManager = require('state.manager');
+const probe = require('pmx').probe();
 
 var aggregator = new stateManager.StateAggregator(execId);
 var aggCount = 0;
@@ -176,15 +177,25 @@ function CreateTracer(options) {
 
 var firstTrace = true;
 var logBuffer = new BufferList();
+let testCounter = probe.counter({
+	name: 'Total tests ran'
+});
+let testMeter = probe.meter({
+	name: 'tests/sec',
+	samples: 1,
+	timeframe: 60
+});
 
 function TraceSingle(db, tracer, name, payload, testCb) {
     console.log("[INFO] TraceSingle Testing " + name);
     tracer.SetInputBuffer(name, payload);
-
     var trFunc = firstTrace ? tracer.Execute : tracer.Resume;
     firstTrace = false;
 
     trFunc.call(tracer, (err, ok) => {
+		testCounter.inc();
+		testMeter.mark();
+
         if (err) {
             // insert error in db
             var ip = "0x" + ((err) >>> 0).toString(16);

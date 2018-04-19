@@ -18,6 +18,7 @@
     "distributed-common": "file:../distributed-common",
     "mongodb": "^2.2.16",
     "node-river": "file:./deps/node-river",
+    "pmx": "^1.6.4",
     "state.manager": "file:../state.manager"
   }
 }
