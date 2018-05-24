@@ -12,9 +12,10 @@
     "amqplib": "^0.5.2",
     "async": "^2.6.0",
     "binary": "^0.3.0",
+    "commander": "^2.15.1",
     "dissolve": "^0.3.3",
-    "mongodb": "^3.0.5",
     "distributed-common": "file:../distributed-common",
-    "process.manager" : "file:../process.manager"
+    "mongodb": "^3.0.5",
+    "process.manager": "file:../process.manager"
   }
 }
