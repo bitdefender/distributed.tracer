@@ -34,6 +34,7 @@ module.exports = exports = {
 		try {
 			commander
 				.option('-c, --config [config_file]', 'Configuration file', "config.json")
+				.allowUnknownOption()
 				.parse(process.argv);
 		} catch (ex) {
 			console.log(ex);
