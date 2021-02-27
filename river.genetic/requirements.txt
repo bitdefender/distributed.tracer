@@ -31,7 +31,7 @@ pysparkling==0.3.24
 python-dateutil==2.5.3
 pytz==2016.7
 pyzmq==16.0.0
-requests==2.11.1
+requests==2.20.0
 simplegeneric==0.8.1
 six==1.10.0
 terminado==0.6
