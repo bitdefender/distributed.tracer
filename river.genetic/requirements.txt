@@ -17,7 +17,7 @@ matplotlib==1.5.3
 mistune==0.8.1
 nbconvert==4.2.0
 nbformat==4.1.0
-notebook==6.1.5
+notebook==6.4.10
 numpy==1.11.2
 parse==1.6.6
 pexpect==4.2.1
